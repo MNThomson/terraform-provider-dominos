@@ -1,21 +1,18 @@
 Terraform Provider for Dominos Pizza
 ==================
-
-# [Documentation](https://ndmckinley.github.io/terraform-provider-dominos/)
-
 # Quickstart
-
-Download `bin/terraform-provider-dominos` and place it on your machine at `~/.terraform.d/plugins/terraform-provider-dominos`.  Make sure to `chmod +x` it.  This is the normal way to install third-party providers - follow instructions at [Installing 3rd Party Plugins](https://www.terraform.io/docs/configuration/providers.html#third-party-plugins) if you have trouble.
-
-```sh
-mkdir ~/.terraform.d/plugins && \
-wget https://github.com/ndmckinley/terraform-provider-dominos/raw/master/bin/terraform-provider-dominos -O ~/.terraform.d/plugins/terraform-provider-dominos && \
-chmod +x ~/.terraform.d/plugins/terraform-provider-dominos
-```
 
 Then write your config.  Here's a sample config - a variation on this worked for me last night.
 
 ```hcl
+terraform {
+    required_providers {
+        dominos = {
+            source = "mnthomson/dominos"
+        }
+    }
+}
+
 provider "dominos" {
   first_name    = "My"
   last_name     = "Name"
@@ -56,4 +53,6 @@ resource "dominos_order" "order" {
 
 `terraform init` as usual and `plan`!  `apply` when ready - but use caution, since this is going to charge you money.
 
-Please view the docs [here](https://ndmckinley.github.io/terraform-provider-dominos/) for more information past the quickstart, as well as some caveats it's probably worth being aware of.
+## Credit
+
+Massive credit to [nat-henderson](https://github.com/nat-henderson/terraform-provider-dominos): they built the kitchen, assembled the wood fired oven, and perfected the recipe. I am merely the waiter serving this pizza to the masses.
