@@ -17,6 +17,14 @@ chmod +x ~/.terraform.d/plugins/terraform-provider-dominos
 ## Sample Configuration
 
 ```hcl
+terraform {
+  required_providers {
+    dominos = {
+      source  = "MNThomson/dominos"
+    }
+  }
+}
+
 provider "dominos" {
   first_name    = "My"
   last_name     = "Name"
@@ -24,34 +32,35 @@ provider "dominos" {
   phone_number  = "15555555555"
 
   credit_card {
-    number = 123456789101112
-    cvv    = 1314
-    date   = "15/16"
-    zip    = 18192
+    number     = 123456789101112
+    cvv        = 1314
+    date       = "15/16"
+    postalcode = 18192
   }
 }
 
 data "dominos_address" "addr" {
-  street = "123 Main St"
-  city   = "Anytown"
-  state  = "WA"
-  zip    = "02122"
+  street     = "123 Main St"
+  city       = "Anytown"
+  state      = "WA"
+  postalcode = "02122"
 }
 
 data "dominos_store" "store" {
-  address_url_object = "${data.dominos_address.addr.url_object}"
+  address_url_object = data.dominos_address.addr.url_object
 }
 
 data "dominos_menu_item" "item" {
-  store_id     = "${data.dominos_store.store.store_id}"
+  store_id     = data.dominos_store.store.store_id
   query_string = ["philly", "medium"]
 }
 
 resource "dominos_order" "order" {
-  address_api_object = "${data.dominos_address.addr.api_object}"
+  address_api_object = data.dominos_address.addr.api_object
   item_codes         = ["${data.dominos_menu_item.item.matches.0.code}"]
-  store_id           = "${data.dominos_store.store.store_id}"
+  store_id           = data.dominos_store.store.store_id
 }
+
 ```
 
 Now I don't know what you're going to get since I don't know what a medium philly is in your area, but in my area it gets you a 12" hand-tossed philly cheesesteak pizza, and it's pretty good.  It's all right.  Regular dominos.
@@ -77,7 +86,7 @@ The credit card fields are optional - if you do not configure a credit card, you
 The `credit_card` block requires the following fields:
 * `number`: just an integer, the whole credit card number.  The API accepts Visa, Amex, and Mastercard.
 * `cvv`: also an integer
-* `zip`: integer!
+* `postalcode`: integer!
 * `date`: The expiration date, as a string, with a slash between the month and year, e.g. `03/19`.
 
 If you don't plan to place an order, you don't need to fill this out.
@@ -85,7 +94,7 @@ If you don't plan to place an order, you don't need to fill this out.
 ## Data Sources
 ### `dominos_address`
 
-This data source takes in your address and writes it back out in the two different JSON formats that the API expects.  Configure it with `street`, `city`, `state`, and `zip`, and use `url_object` and `api_object` in other data sources where required.
+This data source takes in your address and writes it back out in the two different JSON formats that the API expects.  Configure it with `street`, `city`, `state`, and `postalcode`, and use `url_object` and `api_object` in other data sources where required.
 
 ### `dominos_store`
 

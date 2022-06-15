@@ -6,11 +6,11 @@ Then write your config.  Here's a sample config - a variation on this worked for
 
 ```hcl
 terraform {
-    required_providers {
-        dominos = {
-            source = "mnthomson/dominos"
-        }
+  required_providers {
+    dominos = {
+      source = "MNThomson/dominos"
     }
+  }
 }
 
 provider "dominos" {
@@ -35,18 +35,18 @@ data "dominos_address" "addr" {
 }
 
 data "dominos_store" "store" {
-  address_url_object = "${data.dominos_address.addr.url_object}"
+  address_url_object = data.dominos_address.addr.url_object
 }
 
 data "dominos_menu_item" "item" {
-  store_id     = "${data.dominos_store.store.store_id}"
+  store_id     = data.dominos_store.store.store_id
   query_string = ["philly", "medium"]
 }
 
 resource "dominos_order" "order" {
-  address_api_object = "${data.dominos_address.addr.api_object}"
+  address_api_object = data.dominos_address.addr.api_object
   item_codes         = ["${data.dominos_menu_item.item.matches.0.code}"]
-  store_id           = "${data.dominos_store.store.store_id}"
+  store_id           = data.dominos_store.store.store_id
 }
 ```
 

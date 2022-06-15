@@ -1,4 +1,11 @@
+# Terraform
 example.tf
 .terraform/*
 *tfstate*
 crash.log
+
+# Binary
+terraform-provider-dominos
+
+# VSCode
+.vscode
