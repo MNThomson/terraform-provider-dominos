@@ -3,6 +3,8 @@ example.tf
 .terraform/*
 *tfstate*
 crash.log
+terraform.tfstate
+terraform.tfplan
 
 # Binary
 terraform-provider-dominos
