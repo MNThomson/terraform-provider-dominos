@@ -21,7 +21,6 @@ func (t dataSourceAddressType) GetSchema(ctx context.Context) (tfsdk.Schema, dia
 	return tfsdk.Schema{
 		// This description is used by the documentation generator and the language server.
 		MarkdownDescription: "Example data source",
-
 		Attributes: map[string]tfsdk.Attribute{
 			"street": {
 				Type:     types.StringType,

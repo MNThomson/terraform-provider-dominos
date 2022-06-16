@@ -72,7 +72,7 @@ func (p *provider) GetResources(ctx context.Context) (map[string]tfsdk.ResourceT
 func (p *provider) GetDataSources(ctx context.Context) (map[string]tfsdk.DataSourceType, diag.Diagnostics) {
 	return map[string]tfsdk.DataSourceType{
 		"dominos_address": dataSourceAddressType{},
-		// "dominos_store":     dataSourceStoreType{},
+		"dominos_store":   dataSourceStoreType{},
 		// "dominos_menu":      dataSourceMenuType{},
 		// "dominos_menu_item": dataSourceMenuItemType{},
 	}, nil

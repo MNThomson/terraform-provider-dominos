@@ -1,55 +1,104 @@
 package provider
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
+	"strconv"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-func dataSourceStore() *schema.Resource {
-	return &schema.Resource{
-		Read: resourceStoreRead,
-		Schema: map[string]*schema.Schema{
-			"address_url_object": &schema.Schema{
-				Type:     schema.TypeString,
+// Ensure provider defined types fully satisfy framework interfaces
+var _ tfsdk.DataSourceType = dataSourceStoreType{}
+var _ tfsdk.DataSource = dataSourceStore{}
+
+type dataSourceStoreType struct{}
+
+func (t dataSourceStoreType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+	return tfsdk.Schema{
+		MarkdownDescription: "Example data source",
+		// Read:                resourceStoreRead,
+		Attributes: map[string]tfsdk.Attribute{
+			"address_url_object": {
+				Type:     types.StringType,
 				Required: true,
 			},
-			"store_id": &schema.Schema{
-				Type:     schema.TypeString,
+			"store_id": {
+				Type:     types.Int64Type,
 				Computed: true,
 			},
-			"delivery_minutes": &schema.Schema{
-				Type:     schema.TypeInt,
+			"delivery_minutes": {
+				Type:     types.Int64Type,
 				Computed: true,
 			},
 		},
-	}
+	}, nil
 }
 
-func resourceStoreRead(d *schema.ResourceData, m interface{}) error {
+func (t dataSourceStoreType) NewDataSource(ctx context.Context, in tfsdk.Provider) (tfsdk.DataSource, diag.Diagnostics) {
+	provider, diags := convertProviderType(in)
+
+	return dataSourceStore{
+		provider: provider,
+	}, diags
+}
+
+type dataSourceStoreData struct {
+	AddressURLObj   types.String `tfsdk:"address_url_object"`
+	StoreID         types.Int64  `tfsdk:"store_id"`
+	DeliveryMinutes types.Int64  `tfsdk:"delivery_minutes"`
+}
+
+type dataSourceStore struct {
+	provider provider
+}
+
+func (d dataSourceStore) Read(ctx context.Context, req tfsdk.ReadDataSourceRequest, resp *tfsdk.ReadDataSourceResponse) {
+	var data dataSourceStoreData
+
+	diags := req.Config.Get(ctx, &data)
+
+	resp.Diagnostics.Append(diags...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var client = &http.Client{Timeout: 10 * time.Second}
 	address_url_obj := make(map[string]string)
-	err := json.Unmarshal([]byte(d.Get("address_url_object").(string)), &address_url_obj)
+	err := json.Unmarshal([]byte(data.AddressURLObj.Value), &address_url_obj)
 	if err != nil {
-		return err
+		log.Fatalf("Cannot unmarshall address_url_obj")
 	}
 	line1 := url.QueryEscape(address_url_obj["line1"])
 	line2 := url.QueryEscape(address_url_obj["line2"])
 	stores, err := getStores(fmt.Sprintf("https://order.dominos.com/power/store-locator?s=%s&c=%s&s=Delivery", line1, line2), client)
 	if err != nil {
-		return err
+		log.Fatalf("Cannot get stores")
 	}
 	if len(stores) == 0 {
-		return fmt.Errorf("No stores near the address %#v", address_url_obj)
+		log.Fatalf("No stores near the address %#v", address_url_obj)
 	}
-	d.Set("store_id", stores[0].StoreID)
-	d.Set("delivery_minutes", stores[0].ServiceMethodEstimatedWaitMinutes.Delivery.Min)
-	d.SetId("store")
-	return nil
+
+	data.StoreID.Value, _ = strconv.ParseInt(stores[0].StoreID, 10, 64)
+	data.StoreID.Null = false //TODO: Set properly
+
+	data.DeliveryMinutes.Value = int64(stores[0].ServiceMethodEstimatedWaitMinutes.Delivery.Min)
+	data.DeliveryMinutes.Null = false //TODO: Set properly
+
+	// d.SetId("store")
+
+	fmt.Println("\n", data.StoreID.Value, "\nTEST1")
+
+	diags = resp.State.Set(ctx, &data)
+	resp.Diagnostics.Append(diags...)
 }
 
 type StoresResponse struct {
