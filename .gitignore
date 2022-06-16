@@ -5,6 +5,7 @@ example.tf
 crash.log
 terraform.tfstate
 terraform.tfplan
+.terraform.lock.hcl
 
 # Binary
 terraform-provider-dominos

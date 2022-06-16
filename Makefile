@@ -3,7 +3,7 @@ VERSION =0.1.1
 build: *.go
 	go get && go build -o terraform-provider-dominos ./
 
-localinstall:
+localInstall:
 	make clean
 	make build
 	mkdir -p ~/.terraform.d/plugins/terraform.local/mnthomson/dominos/$(VERSION)/linux_amd64/
@@ -13,3 +13,8 @@ localinstall:
 clean:
 	rm -rf .terraform .terraform.lock.hcl
 	rm -rf terraform-provider-dominos
+
+localTest:
+	clear
+	make localInstall
+	TF_LOG=TRACE terraform plan

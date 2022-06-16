@@ -31,11 +31,8 @@ func (t dataSourceMenuType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.D
 				Required: true,
 			},
 			"menu": {
-				Type: types.ListType{
-					ElemType: types.StringType,
-				},
 				Computed: true,
-				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
+				Attributes: tfsdk.ListNestedAttributes(map[string]tfsdk.Attribute{
 					"name": {
 						Type:     types.Int64Type,
 						Computed: true,
@@ -49,6 +46,7 @@ func (t dataSourceMenuType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.D
 						Computed: true,
 					},
 				}),
+				Description: "Menu Items",
 			},
 		},
 	}, nil
@@ -63,8 +61,8 @@ func (t dataSourceMenuType) NewDataSource(ctx context.Context, in tfsdk.Provider
 }
 
 type dataSourceMenuData struct {
-	StoreID         types.Int64 `tfsdk:"store_id"`
-	DeliveryMinutes types.Int64 `tfsdk:"delivery_minutes"`
+	StoreID types.Int64 `tfsdk:"store_id"`
+	Menu    []menuItem  `tfsdk:"delivery_minutes"`
 }
 
 type dataSourceMenu struct {
@@ -84,47 +82,19 @@ func (d dataSourceMenu) Read(ctx context.Context, req tfsdk.ReadDataSourceReques
 
 	var client = &http.Client{Timeout: 10 * time.Second}
 
-	menuitems, err := getAllMenuItems(fmt.Sprintf("https://order.dominos.com/power/store/%s/menu?lang=en&structured=true", data.StoreID), client)
+	menuitems, err := getAllMenuItems(fmt.Sprintf("https://order.dominos.com/power/store/%d/menu?lang=en&structured=true", data.StoreID.Value), client)
 	if err != nil {
-		log.Fatalf("Cannot get all menu items")
-	}
-	menu := make([]map[string]interface{}, 0, len(menuitems))
-	for i := range menuitems {
-		menu = append(menu, map[string]interface{}{"name": menuitems[i].Name, "code": menuitems[i].Code, "price_cents": menuitems[i].PriceCents})
+		log.Fatalf("Cannot get all menu items: ", err)
 	}
 
-	log.Printf("len menu: %d", len(menu))
-	data.StoreID.Value, _ = strconv.ParseInt(stores[0].StoreID, 10, 64)
-	data.StoreID.Null = false //TODO: Set properly
+	for i := range menuitems {
+		data.Menu = append(data.Menu, menuItem{Name: menuitems[i].Name, Code: menuitems[i].Code, PriceCents: menuitems[i].PriceCents})
+	}
+
+	log.Printf("len menu: %d", len(data.Menu))
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
-}
-
-/*
-func resourceMenuRead(d *schema.ResourceData, m interface{}) error {
-	var client = &http.Client{Timeout: 10 * time.Second}
-	store_id := d.Get("store_id").(string)
-	menuitems, err := getAllMenuItems(fmt.Sprintf("https://order.dominos.com/power/store/%s/menu?lang=en&structured=true", store_id), client)
-	if err != nil {
-		return err
-	}
-	menu := make([]map[string]interface{}, 0, len(menuitems))
-	for i := range menuitems {
-		menu = append(menu, map[string]interface{}{"name": menuitems[i].Name, "code": menuitems[i].Code, "price_cents": menuitems[i].PriceCents})
-	}
-	if err := d.Set("menu", menu); err != nil {
-		return err
-	}
-	log.Printf("len menu: %d", len(menu))
-	d.SetId(store_id)
-	return nil
-}
-*/
-type MenuItem struct {
-	Code       string
-	Name       string
-	PriceCents int64
 }
 
 func getMenuApiObject(url string, client *http.Client) (map[string]interface{}, error) {
@@ -138,13 +108,13 @@ func getMenuApiObject(url string, client *http.Client) (map[string]interface{}, 
 	return resp, err
 }
 
-func getAllMenuItems(url string, client *http.Client) ([]MenuItem, error) {
+func getAllMenuItems(url string, client *http.Client) ([]menuItem, error) {
 	resp, err := getMenuApiObject(url, client)
 	if err != nil {
 		return nil, err
 	}
 	products := resp["Variants"].(map[string]interface{})
-	all_products := make([]MenuItem, 0, len(products))
+	all_products := make([]menuItem, 0, len(products))
 	log.Printf("len products: %d", len(products))
 	for name, d := range products {
 		dict := d.(map[string]interface{})
@@ -154,7 +124,7 @@ func getAllMenuItems(url string, client *http.Client) ([]MenuItem, error) {
 		if err != nil {
 			continue
 		}
-		all_products = append(all_products, MenuItem{
+		all_products = append(all_products, menuItem{
 			Code:       name,
 			Name:       dict["Name"].(string),
 			PriceCents: price_cents,
