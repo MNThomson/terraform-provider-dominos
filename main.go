@@ -24,7 +24,6 @@ func main() {
 	flag.Parse()
 
 	opts := providerserver.ServeOpts{
-		//TODO Change me
 		Address: registryURL(),
 		Debug:   debug,
 	}
