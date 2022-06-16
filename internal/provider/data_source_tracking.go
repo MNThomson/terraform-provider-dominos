@@ -1,40 +1,77 @@
 package provider
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-func dataSourceTracking() *schema.Resource {
-	return &schema.Resource{
-		Read: resourceTrackingRead,
-		Schema: map[string]*schema.Schema{
-			"order_id": &schema.Schema{
-				Type:     schema.TypeString,
+// Ensure provider defined types fully satisfy framework interfaces
+var _ tfsdk.DataSourceType = dataSourceTrackingType{}
+var _ tfsdk.DataSource = dataSourceTracking{}
+
+type dataSourceTrackingType struct{}
+
+func (t dataSourceTrackingType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+	return tfsdk.Schema{
+		MarkdownDescription: "Example data source",
+		Attributes: map[string]tfsdk.Attribute{
+			"store_id": {
+				Type:     types.Int64Type,
 				Required: true,
 			},
-			"store_id": &schema.Schema{
-				Type:     schema.TypeString,
+			"order_id": {
+				Type:     types.Int64Type,
 				Required: true,
 			},
 		},
-	}
+	}, nil
 }
 
-func resourceTrackingRead(d *schema.ResourceData, m interface{}) error {
-	var client = &http.Client{Timeout: 10 * time.Second}
-	order_id := d.Get("order_id").(string)
-	store_id := d.Get("store_id").(string)
-	_, err := getTrackingApiObject(fmt.Sprintf("https://trkweb.dominos.com/orderstorage/GetTrackerData?StoreID=%s&OrderKey=%s", store_id, order_id), client)
-	if err != nil {
-		return err
+func (t dataSourceTrackingType) NewDataSource(ctx context.Context, in tfsdk.Provider) (tfsdk.DataSource, diag.Diagnostics) {
+	provider, diags := convertProviderType(in)
+
+	return dataSourceTracking{
+		provider: provider,
+	}, diags
+}
+
+type dataSourceTrackingData struct {
+	StoreID types.Int64 `tfsdk:"store_id"`
+	OrderID types.Int64 `tfsdk:"order_id"`
+}
+
+type dataSourceTracking struct {
+	provider provider
+}
+
+func (d dataSourceTracking) Read(ctx context.Context, req tfsdk.ReadDataSourceRequest, resp *tfsdk.ReadDataSourceResponse) {
+	var data dataSourceTrackingData
+
+	diags := req.Config.Get(ctx, &data)
+
+	resp.Diagnostics.Append(diags...)
+
+	if resp.Diagnostics.HasError() {
+		return
 	}
-	return nil
+
+	var client = &http.Client{Timeout: 10 * time.Second}
+
+	_, err := getTrackingApiObject(fmt.Sprintf("https://trkweb.dominos.com/orderstorage/GetTrackerData?StoreID=%d&OrderKey=%d", data.StoreID.Value, data.OrderID.Value), client)
+	if err != nil {
+		log.Fatalf("Cannot get tracking api object: ", err)
+	}
+
+	diags = resp.State.Set(ctx, &data)
+	resp.Diagnostics.Append(diags...)
 }
 
 func getTrackingApiObject(url string, client *http.Client) (map[string]interface{}, error) {

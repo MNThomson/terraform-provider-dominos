@@ -25,7 +25,7 @@ func main() {
 
 	opts := providerserver.ServeOpts{
 		//TODO Change me
-		Address: "registry.local/MNThomson/dominos",
+		Address: registryURL(),
 		Debug:   debug,
 	}
 
@@ -34,4 +34,11 @@ func main() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+}
+
+func registryURL() string {
+	if version == "dev" {
+		return "registry.local/MNThomson/dominos"
+	}
+	return "registry.terraform.io/providers/MNThomson/dominos"
 }

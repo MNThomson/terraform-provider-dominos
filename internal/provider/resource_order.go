@@ -24,19 +24,19 @@ func (t resourceOrderType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Di
 		Attributes: map[string]tfsdk.Attribute{
 			"address_api_object": {
 				// MarkdownDescription: "Example configurable attribute",
-				Optional: true,
+				Required: true,
 				Type:     types.StringType,
 			},
 			"item_codes": {
 				// MarkdownDescription: "Example configurable attribute",
-				Optional: true,
+				Required: true,
 				Type: types.ListType{
-					ElemType: types.Int64Type,
+					ElemType: types.StringType,
 				},
 			},
 			"store_id": {
 				// MarkdownDescription: "Example configurable attribute",
-				Optional: true,
+				Required: true,
 				Type:     types.Int64Type,
 			},
 			"price_only": {
