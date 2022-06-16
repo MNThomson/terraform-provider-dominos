@@ -45,12 +45,12 @@ func (t resourceOrderType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Di
 				Type:     types.BoolType,
 			},
 			"total_price": {
-				Computed: true,
 				// MarkdownDescription: "Example identifier",
+				Computed: true,
 				PlanModifiers: tfsdk.AttributePlanModifiers{
 					tfsdk.UseStateForUnknown(),
 				},
-				Type: types.StringType,
+				Type: types.NumberType,
 			},
 		},
 	}, nil

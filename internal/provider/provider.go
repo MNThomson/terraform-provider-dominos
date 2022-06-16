@@ -4,9 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	_ "context"
-	_ "fmt"
-
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -37,15 +34,19 @@ type provider struct {
 }
 
 type providerData struct {
-	FirstName        string
-	LastName         string
-	EmailAddr        string
-	PhoneNumber      string
-	CreditCardNumber int64
-	Cvv              int64
-	ExprDate         string
-	Zip              int64
-	CardType         string
+	FirstName   types.String    `tfsdk:"first_name"`
+	LastName    types.String    `tfsdk:"last_name"`
+	EmailAddr   types.String    `tfsdk:"email_address"`
+	PhoneNumber types.String    `tfsdk:"phone_number"`
+	CreditCard  *creditCardData `tfsdk:"credit_card"`
+}
+
+type creditCardData struct {
+	CreditCardNumber types.Int64  `tfsdk:"number"`
+	Cvv              types.Int64  `tfsdk:"cvv"`
+	ExprDate         types.String `tfsdk:"date"`
+	Zip              types.String `tfsdk:"zip"`
+	CardType         types.String `tfsdk:"card_type"`
 }
 
 func (p *provider) Configure(ctx context.Context, req tfsdk.ConfigureProviderRequest, resp *tfsdk.ConfigureProviderResponse) {
@@ -57,7 +58,7 @@ func (p *provider) Configure(ctx context.Context, req tfsdk.ConfigureProviderReq
 		return
 	}
 
-	data.CardType = "VISA"
+	// data.CreditCard.CardType.Value = "VISA"
 
 	p.configured = true
 }
@@ -102,27 +103,28 @@ func (p *provider) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostic
 			},
 			"credit_card": {
 				// MarkdownDescription: "Example provider attribute",
-				Optional: true,
+				Required:  true,
+				Sensitive: true,
 				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
 					"number": {
-						Type:      types.Int64Type,
-						Required:  true,
-						Sensitive: true,
+						Type:     types.Int64Type,
+						Required: true,
 					},
 					"cvv": {
-						Type:      types.Int64Type,
-						Required:  true,
-						Sensitive: true,
+						Type:     types.Int64Type,
+						Required: true,
 					},
 					"date": {
-						Type:      types.Int64Type,
-						Required:  true,
-						Sensitive: true,
+						Type:     types.StringType,
+						Required: true,
 					},
 					"zip": {
-						Type:      types.StringType,
-						Required:  true,
-						Sensitive: true,
+						Type:     types.StringType,
+						Required: true,
+					},
+					"card_type": {
+						Type:     types.StringType,
+						Optional: true,
 					},
 				}),
 			},
