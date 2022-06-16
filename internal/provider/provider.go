@@ -45,7 +45,7 @@ type creditCardData struct {
 	CreditCardNumber types.Int64  `tfsdk:"number"`
 	Cvv              types.Int64  `tfsdk:"cvv"`
 	ExprDate         types.String `tfsdk:"date"`
-	Zip              types.String `tfsdk:"zip"`
+	PostalCode       types.String `tfsdk:"postal_code"`
 	CardType         types.String `tfsdk:"card_type"`
 }
 
@@ -118,7 +118,7 @@ func (p *provider) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostic
 						Type:     types.StringType,
 						Required: true,
 					},
-					"zip": {
+					"postal_code": {
 						Type:     types.StringType,
 						Required: true,
 					},

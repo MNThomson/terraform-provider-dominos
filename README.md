@@ -23,15 +23,15 @@ provider "dominos" {
     number = 123456789101112
     cvv    = 1314
     date   = "15/16"
-    zip    = 18192
+    postal_code    = 18192
   }
 }
 
 data "dominos_address" "addr" {
   street = "123 Main St"
   city   = "Anytown"
-  state  = "WA"
-  zip    = "02122"
+  region  = "WA"
+  postal_code    = "02122"
 }
 
 data "dominos_store" "store" {

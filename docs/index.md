@@ -42,7 +42,7 @@ provider "dominos" {
 data "dominos_address" "addr" {
   street     = "123 Main St"
   city       = "Anytown"
-  state      = "WA"
+  region      = "WA"
   postalcode = "02122"
 }
 
@@ -94,7 +94,7 @@ If you don't plan to place an order, you don't need to fill this out.
 ## Data Sources
 ### `dominos_address`
 
-This data source takes in your address and writes it back out in the two different JSON formats that the API expects.  Configure it with `street`, `city`, `state`, and `postalcode`, and use `url_object` and `api_object` in other data sources where required.
+This data source takes in your address and writes it back out in the two different JSON formats that the API expects.  Configure it with `street`, `city`, `region`, and `postalcode`, and use `url_object` and `api_object` in other data sources where required.
 
 ### `dominos_store`
 

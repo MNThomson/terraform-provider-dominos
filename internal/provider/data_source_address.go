@@ -31,13 +31,17 @@ func (t dataSourceAddressType) GetSchema(ctx context.Context) (tfsdk.Schema, dia
 				Type:     types.StringType,
 				Required: true,
 			},
-			"state": {
+			"region": {
 				Type:     types.StringType,
 				Required: true,
 			},
-			"zip": {
+			"postal_code": {
 				Type:     types.StringType,
 				Required: true,
+			},
+			"type": {
+				Type:     types.StringType,
+				Optional: true,
 			},
 			"url_object": {
 				Type:     types.StringType,
@@ -62,8 +66,8 @@ func (t dataSourceAddressType) NewDataSource(ctx context.Context, in tfsdk.Provi
 type dataSourceAddressData struct {
 	Street     types.String `tfsdk:"street"`
 	City       types.String `tfsdk:"city"`
-	Region     types.String `tfsdk:"state"`
-	PostalCode types.String `tfsdk:"zip"`
+	Region     types.String `tfsdk:"region"`
+	PostalCode types.String `tfsdk:"postal_code"`
 	Type       types.String `tfsdk:"type"`
 	APIObject  types.String `tfsdk:"api_object"`
 	URLObject  types.String `tfsdk:"url_object"`
@@ -81,21 +85,9 @@ func (d dataSourceAddress) Read(ctx context.Context, req tfsdk.ReadDataSourceReq
 
 	resp.Diagnostics.Append(diags...)
 
-	log.Printf("got here")
-
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
-	log.Printf("got here")
-
-	// If applicable, this is a great opportunity to initialize any necessary
-	// provider client data and make a call using it.
-	// example, err := d.provider.client.ReadExample(...)
-	// if err != nil {
-	//     resp.Diagnostics.AddError("Client Error", fmt.Sprintf("Unable to read example, got error: %s", err))
-	//     return
-	// }
 
 	urlobj := map[string]string{
 		"line1": data.Street.Value,
@@ -114,53 +106,17 @@ func (d dataSourceAddress) Read(ctx context.Context, req tfsdk.ReadDataSourceReq
 
 	}
 
-	url_json_string := string(url_json)
-	log.Printf("[DEBUG] url json: %#v to %s", urlobj, url_json_string)
+	data.URLObject.Value = string(url_json)
+	data.URLObject.Null = false //TODO: Set properly
 
 	api_json, err := json.Marshal(apiobj)
 	if err != nil {
 		log.Fatalf("Cannot unmarshall apiobj")
 	}
-	api_json_string := string(api_json)
-	data.APIObject.Value = api_json_string
+
+	data.APIObject.Value = string(api_json)
+	data.APIObject.Null = false //TODO: Set properly
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
-
-/*
-
-func resourceAddressRead(d *schema.ResourceData, m interface{}) error {
-	d.SetId("address")
-	urlobj := map[string]string{
-		"line1": d.Get("street").(string),
-		"line2": fmt.Sprintf("%s, %s %s", d.Get("city").(string), d.Get("state").(string), d.Get("zip").(string)),
-	}
-	apiobj := map[string]string{
-		"Street":     d.Get("street").(string),
-		"City":       d.Get("city").(string),
-		"Region":     d.Get("state").(string),
-		"PostalCode": d.Get("zip").(string),
-		"Type":       "House",
-	}
-	url_json, err := json.Marshal(urlobj)
-	if err != nil {
-		return err
-	}
-	url_json_string := string(url_json)
-	log.Printf("[DEBUG] url json: %#v to %s", urlobj, url_json_string)
-	if err := d.Set("url_object", url_json_string); err != nil {
-		return err
-	}
-	api_json, err := json.Marshal(apiobj)
-	if err != nil {
-		return err
-	}
-	api_json_string := string(api_json)
-	if err := d.Set("api_object", api_json_string); err != nil {
-		return err
-	}
-	return nil
-}
-
-*/
