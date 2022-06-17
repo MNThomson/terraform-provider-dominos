@@ -12,6 +12,7 @@ localInstall:
 
 clean:
 	rm -rf .terraform .terraform.lock.hcl
+	rm -rf terraform.tfstate*
 	rm -rf terraform-provider-dominos
 
 localTest:
