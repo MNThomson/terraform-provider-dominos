@@ -1,0 +1,22 @@
+name: Security
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  TruffleHog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: TruffleHog Scan
+        uses: trufflesecurity/trufflehog@v3.5.0
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD
