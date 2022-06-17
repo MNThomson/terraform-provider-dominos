@@ -1,0 +1,19 @@
+# Add 'CI/CD' label to any change within .github/workflows
+CI/CD:
+- .github/workflows/*
+- .github/workflows/**/*
+
+# Add 'security' label to any change to the security CI workflow
+security:
+- .github/workflows/security.yml
+
+# Add 'provider' label to any change to the internal provider
+provider:
+- internal/provider/*
+- internal/provider/**/*
+
+# Add 'documentation' label to any changes to the README or templates
+documentation:
+- 'README.md'
+- templates/*
+- templates/**/*
