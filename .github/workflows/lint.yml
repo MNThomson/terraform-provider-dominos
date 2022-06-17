@@ -12,7 +12,7 @@ permissions:
 
 jobs:
   golangci:
-    name: lint
+    name: Golangci-lint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
