@@ -91,7 +91,7 @@ func (d dataSourceMenuItem) Read(ctx context.Context, req tfsdk.ReadDataSourceRe
 	var client = &http.Client{Timeout: 10 * time.Second}
 	menuitems, err := getAllMenuItems(fmt.Sprintf("https://order.dominos.com/power/store/%d/menu?lang=en&structured=true", data.StoreID.Value), client)
 	if err != nil {
-		log.Fatalf("Cannot get all menu items: ", err)
+		log.Fatalf("Cannot get all menu items: %v", err)
 	}
 	/*
 			queries := data.QueryString.([]interface{})
