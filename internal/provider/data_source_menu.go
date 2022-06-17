@@ -1,6 +1,7 @@
 package provider
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -10,64 +11,88 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
+	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-func dataSourceMenu() *schema.Resource {
-	return &schema.Resource{
-		Read: resourceMenuRead,
-		Schema: map[string]*schema.Schema{
-			"store_id": &schema.Schema{
-				Type:     schema.TypeString,
+// Ensure provider defined types fully satisfy framework interfaces
+var _ tfsdk.DataSourceType = dataSourceMenuType{}
+var _ tfsdk.DataSource = dataSourceMenu{}
+
+type dataSourceMenuType struct{}
+
+func (t dataSourceMenuType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
+	return tfsdk.Schema{
+		MarkdownDescription: "Example data source",
+		Attributes: map[string]tfsdk.Attribute{
+			"store_id": {
+				Type:     types.Int64Type,
 				Required: true,
 			},
-			"menu": &schema.Schema{
-				Type:     schema.TypeList,
+			"menu": {
 				Computed: true,
-				Elem: &schema.Resource{
-					Schema: map[string]*schema.Schema{
-						"name": &schema.Schema{
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"code": &schema.Schema{
-							Type:     schema.TypeString,
-							Computed: true,
-						},
-						"price_cents": &schema.Schema{
-							Type:     schema.TypeInt,
-							Computed: true,
-						},
+				Attributes: tfsdk.ListNestedAttributes(map[string]tfsdk.Attribute{
+					"name": {
+						Type:     types.StringType,
+						Computed: true,
 					},
-				},
+					"code": {
+						Type:     types.StringType,
+						Computed: true,
+					},
+					"price_cents": {
+						Type:     types.Int64Type,
+						Computed: true,
+					},
+				}),
+				Description: "Menu Items",
 			},
 		},
-	}
+	}, nil
 }
 
-func resourceMenuRead(d *schema.ResourceData, m interface{}) error {
+func (t dataSourceMenuType) NewDataSource(ctx context.Context, in tfsdk.Provider) (tfsdk.DataSource, diag.Diagnostics) {
+	provider, diags := convertProviderType(in)
+
+	return dataSourceMenu{
+		provider: provider,
+	}, diags
+}
+
+type dataSourceMenuData struct {
+	StoreID types.Int64 `tfsdk:"store_id"`
+	Menu    []menuItem  `tfsdk:"delivery_minutes"`
+}
+
+type dataSourceMenu struct {
+	provider provider
+}
+
+func (d dataSourceMenu) Read(ctx context.Context, req tfsdk.ReadDataSourceRequest, resp *tfsdk.ReadDataSourceResponse) {
+	var data dataSourceMenuData
+
+	diags := req.Config.Get(ctx, &data)
+
+	resp.Diagnostics.Append(diags...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
 	var client = &http.Client{Timeout: 10 * time.Second}
-	store_id := d.Get("store_id").(string)
-	menuitems, err := getAllMenuItems(fmt.Sprintf("https://order.dominos.com/power/store/%s/menu?lang=en&structured=true", store_id), client)
-	if err != nil {
-		return err
-	}
-	menu := make([]map[string]interface{}, 0, len(menuitems))
-	for i := range menuitems {
-		menu = append(menu, map[string]interface{}{"name": menuitems[i].Name, "code": menuitems[i].Code, "price_cents": menuitems[i].PriceCents})
-	}
-	if err := d.Set("menu", menu); err != nil {
-		return err
-	}
-	log.Printf("len menu: %d", len(menu))
-	d.SetId(store_id)
-	return nil
-}
 
-type MenuItem struct {
-	Code       string
-	Name       string
-	PriceCents int64
+	menuitems, err := getAllMenuItems(fmt.Sprintf("https://order.dominos.com/power/store/%d/menu?lang=en&structured=true", data.StoreID.Value), client)
+	if err != nil {
+		log.Fatalf("Cannot get all menu items: ", err)
+	}
+
+	for i := range menuitems {
+		data.Menu = append(data.Menu, menuItem{Name: menuitems[i].Name, Code: menuitems[i].Code, PriceCents: menuitems[i].PriceCents})
+	}
+
+	diags = resp.State.Set(ctx, &data)
+	resp.Diagnostics.Append(diags...)
 }
 
 func getMenuApiObject(url string, client *http.Client) (map[string]interface{}, error) {
@@ -81,14 +106,13 @@ func getMenuApiObject(url string, client *http.Client) (map[string]interface{}, 
 	return resp, err
 }
 
-func getAllMenuItems(url string, client *http.Client) ([]MenuItem, error) {
+func getAllMenuItems(url string, client *http.Client) ([]menuItem, error) {
 	resp, err := getMenuApiObject(url, client)
 	if err != nil {
 		return nil, err
 	}
 	products := resp["Variants"].(map[string]interface{})
-	all_products := make([]MenuItem, 0, len(products))
-	log.Printf("len products: %d", len(products))
+	all_products := make([]menuItem, 0, len(products))
 	for name, d := range products {
 		dict := d.(map[string]interface{})
 		price := dict["Price"].(string)
@@ -97,7 +121,7 @@ func getAllMenuItems(url string, client *http.Client) ([]MenuItem, error) {
 		if err != nil {
 			continue
 		}
-		all_products = append(all_products, MenuItem{
+		all_products = append(all_products, menuItem{
 			Code:       name,
 			Name:       dict["Name"].(string),
 			PriceCents: price_cents,
