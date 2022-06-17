@@ -9,8 +9,8 @@ on:
     - cron: '0 7 * * 1'
 
 jobs:
-  analyze:
-    name: Analyze
+  codeql:
+    name: CodeQL Analyze
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
