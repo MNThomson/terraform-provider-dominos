@@ -11,6 +11,24 @@ permissions:
   pull-requests: read
 
 jobs:
+  gofmt:
+    name: Go fmt
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Setup Go
+        uses: actions/setup-go@v3
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+      - name: Go fmt
+        run: go fmt
+      - name: git diff
+        run: |
+          git diff --compact-summary --exit-code || \
+            (echo; echo "Unexpected difference in directories after formatting. Run 'go fmt' command and commit."; exit 1)
+
   golangci:
     name: Golangci-lint
     runs-on: ubuntu-latest
