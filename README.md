@@ -1,6 +1,6 @@
-Terraform Provider for Dominos Pizza
-==================
-# Quickstart
+# Terraform Provider for Dominos Pizza
+
+## Quickstart
 
 Then write your config.  Here's a sample config - a variation on this worked for me last night.
 

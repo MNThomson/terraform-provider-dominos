@@ -1,5 +1,5 @@
 # Terraform
-example.tf
+test.tf
 .terraform
 .terraform.d
 *tfstate*
