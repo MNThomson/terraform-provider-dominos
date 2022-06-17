@@ -82,23 +82,23 @@ func (p *provider) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostic
 	return tfsdk.Schema{
 		Attributes: map[string]tfsdk.Attribute{
 			"email_address": {
-				Optional: true,
+				Required: true,
 				Type:     types.StringType,
 			},
 			"first_name": {
-				Optional: true,
+				Required: true,
 				Type:     types.StringType,
 			},
 			"last_name": {
-				Optional: true,
+				Required: true,
 				Type:     types.StringType,
 			},
 			"phone_number": {
-				Optional: true,
+				Required: true,
 				Type:     types.StringType,
 			},
 			"credit_card": {
-				Required:  true,
+				Optional:  true,
 				Sensitive: true,
 				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
 					"number": {

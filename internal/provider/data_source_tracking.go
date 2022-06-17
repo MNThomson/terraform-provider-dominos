@@ -67,7 +67,7 @@ func (d dataSourceTracking) Read(ctx context.Context, req tfsdk.ReadDataSourceRe
 
 	_, err := getTrackingApiObject(fmt.Sprintf("https://trkweb.dominos.com/orderstorage/GetTrackerData?StoreID=%d&OrderKey=%d", data.StoreID.Value, data.OrderID.Value), client)
 	if err != nil {
-		log.Fatalf("Cannot get tracking api object: ", err)
+		log.Fatalf("Cannot get tracking api object: %v", err)
 	}
 
 	diags = resp.State.Set(ctx, &data)

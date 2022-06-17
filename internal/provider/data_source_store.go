@@ -80,7 +80,7 @@ func (d dataSourceStore) Read(ctx context.Context, req tfsdk.ReadDataSourceReque
 	line2 := url.QueryEscape(address_url_obj["line2"])
 	stores, err := getStores(fmt.Sprintf("https://order.dominos.com/power/store-locator?s=%s&c=%s&s=Delivery", line1, line2), client)
 	if err != nil {
-		log.Fatalf("Cannot get stores: ", err)
+		log.Fatalf("Cannot get stores: %v", err)
 	}
 	if len(stores) == 0 {
 		log.Fatalf("No stores near the address %#v", address_url_obj)
