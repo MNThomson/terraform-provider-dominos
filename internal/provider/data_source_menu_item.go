@@ -106,6 +106,7 @@ func (d dataSourceMenuItem) Read(ctx context.Context, req tfsdk.ReadDataSourceRe
 			}
 	*/
 	data.Matches = append(data.Matches, menuitems[0])
+	data.Matches = append(data.Matches, menuitems[1])
 
 	log.Printf("len menu: %d", len(data.Matches))
 

@@ -82,27 +82,22 @@ func (p *provider) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostic
 	return tfsdk.Schema{
 		Attributes: map[string]tfsdk.Attribute{
 			"email_address": {
-				// MarkdownDescription: "Example provider attribute",
 				Optional: true,
 				Type:     types.StringType,
 			},
 			"first_name": {
-				// MarkdownDescription: "Example provider attribute",
 				Optional: true,
 				Type:     types.StringType,
 			},
 			"last_name": {
-				// MarkdownDescription: "Example provider attribute",
 				Optional: true,
 				Type:     types.StringType,
 			},
 			"phone_number": {
-				// MarkdownDescription: "Example provider attribute",
 				Optional: true,
 				Type:     types.StringType,
 			},
 			"credit_card": {
-				// MarkdownDescription: "Example provider attribute",
 				Required:  true,
 				Sensitive: true,
 				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{

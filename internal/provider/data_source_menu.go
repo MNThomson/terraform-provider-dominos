@@ -27,14 +27,14 @@ func (t dataSourceMenuType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.D
 		MarkdownDescription: "Example data source",
 		Attributes: map[string]tfsdk.Attribute{
 			"store_id": {
-				Type:     types.StringType,
+				Type:     types.Int64Type,
 				Required: true,
 			},
 			"menu": {
 				Computed: true,
 				Attributes: tfsdk.ListNestedAttributes(map[string]tfsdk.Attribute{
 					"name": {
-						Type:     types.Int64Type,
+						Type:     types.StringType,
 						Computed: true,
 					},
 					"code": {

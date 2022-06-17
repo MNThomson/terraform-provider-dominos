@@ -24,7 +24,6 @@ type dataSourceStoreType struct{}
 func (t dataSourceStoreType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		MarkdownDescription: "Example data source",
-		// Read:                resourceStoreRead,
 		Attributes: map[string]tfsdk.Attribute{
 			"address_url_object": {
 				Type:     types.StringType,
