@@ -1,4 +1,4 @@
-name: Tests
+name: Test
 
 on:
   push:
@@ -28,6 +28,7 @@ jobs:
         run: go build -v .
 
   generate:
+    name: Test generate
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -45,7 +46,7 @@ jobs:
             (echo; echo "Unexpected difference in directories after code generation. Run 'go generate ./...' command and commit."; exit 1)
 
   test:
-    name: Terraform Provider Acceptance Tests
+    name: TF Provider Test
     needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 15
