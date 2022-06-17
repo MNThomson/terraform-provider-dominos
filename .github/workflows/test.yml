@@ -71,7 +71,7 @@ jobs:
           terraform_version: ${{ matrix.terraform }}
           terraform_wrapper: false
       - name: Set up gotestfmt
-        uses: haveyoudebuggedit/gotestfmt-action@v2.3
+        uses: haveyoudebuggedit/gotestfmt-action@v2.3.2
       - name: Go mod download
         run: go mod download
       - name: Go test
