@@ -11,7 +11,7 @@ localInstall:
 	terraform init -plugin-dir .terraform.d/plugins/
 
 clean:
-	rm -rf .terraform .terraform.lock.hcl
+	rm -rf .terraform .terraform.d .terraform.lock.hcl
 	rm -rf terraform.tfstate*
 	rm -rf terraform-provider-dominos
 
