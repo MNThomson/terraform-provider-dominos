@@ -80,21 +80,15 @@ func (d dataSourceStore) Read(ctx context.Context, req tfsdk.ReadDataSourceReque
 	line2 := url.QueryEscape(address_url_obj["line2"])
 	stores, err := getStores(fmt.Sprintf("https://order.dominos.com/power/store-locator?s=%s&c=%s&s=Delivery", line1, line2), client)
 	if err != nil {
-		log.Fatalf("Cannot get stores")
+		log.Fatalf("Cannot get stores: ", err)
 	}
 	if len(stores) == 0 {
 		log.Fatalf("No stores near the address %#v", address_url_obj)
 	}
+	storeID, _ := strconv.ParseInt(stores[0].StoreID, 10, 64)
+	data.StoreID = types.Int64{Value: storeID}
 
-	data.StoreID.Value, _ = strconv.ParseInt(stores[0].StoreID, 10, 64)
-	data.StoreID.Null = false //TODO: Set properly
-
-	data.DeliveryMinutes.Value = int64(stores[0].ServiceMethodEstimatedWaitMinutes.Delivery.Min)
-	data.DeliveryMinutes.Null = false //TODO: Set properly
-
-	// d.SetId("store")
-
-	fmt.Println("\n", data.StoreID.Value, "\nTEST1")
+	data.DeliveryMinutes = types.Int64{Value: int64(stores[0].ServiceMethodEstimatedWaitMinutes.Delivery.Min)}
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
@@ -106,15 +100,11 @@ type StoresResponse struct {
 
 type Store struct {
 	StoreID                           string
-	ServiceMethodEstimatedWaitMinutes WaitMinutes
-}
-
-type WaitMinutes struct {
-	Delivery DeliveryMinutes
-}
-
-type DeliveryMinutes struct {
-	Min int
+	ServiceMethodEstimatedWaitMinutes struct {
+		Delivery struct {
+			Min int64
+		}
+	}
 }
 
 func getStores(url string, client *http.Client) ([]Store, error) {

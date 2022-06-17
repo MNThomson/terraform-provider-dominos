@@ -105,16 +105,14 @@ func (d dataSourceAddress) Read(ctx context.Context, req tfsdk.ReadDataSourceReq
 
 	}
 
-	data.URLObject.Value = string(url_json)
-	data.URLObject.Null = false //TODO: Set properly
+	data.URLObject = types.String{Value: string(url_json)}
 
 	api_json, err := json.Marshal(apiobj)
 	if err != nil {
 		log.Fatalf("Cannot unmarshall apiobj")
 	}
 
-	data.APIObject.Value = string(api_json)
-	data.APIObject.Null = false //TODO: Set properly
+	data.APIObject = types.String{Value: string(api_json)}
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)

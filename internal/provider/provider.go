@@ -58,7 +58,7 @@ func (p *provider) Configure(ctx context.Context, req tfsdk.ConfigureProviderReq
 		return
 	}
 
-	// data.CreditCard.CardType.Value = "VISA"
+	data.CreditCard.CardType = types.String{Value: string("VISA")}
 
 	p.configured = true
 }

@@ -82,6 +82,5 @@ func getTrackingApiObject(url string, client *http.Client) (map[string]interface
 	defer r.Body.Close()
 	resp := make(map[string]interface{})
 	err = json.NewDecoder(r.Body).Decode(&resp)
-	log.Printf("Tracking response: %#v", resp)
 	return resp, err
 }

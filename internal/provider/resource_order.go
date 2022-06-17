@@ -7,7 +7,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-go/tftypes"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -81,15 +80,12 @@ func (r resourceOrder) Create(ctx context.Context, req tfsdk.CreateResourceReque
 		return
 	}
 
-	tflog.Trace(ctx, "created a resource")
-
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
 
 func (r resourceOrder) Read(ctx context.Context, req tfsdk.ReadResourceRequest, resp *tfsdk.ReadResourceResponse) {
 	var data resourceOrderData
-	tflog.Trace(ctx, "READ Resource")
 
 	diags := req.State.Get(ctx, &data)
 	resp.Diagnostics.Append(diags...)

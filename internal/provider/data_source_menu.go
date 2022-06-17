@@ -91,8 +91,6 @@ func (d dataSourceMenu) Read(ctx context.Context, req tfsdk.ReadDataSourceReques
 		data.Menu = append(data.Menu, menuItem{Name: menuitems[i].Name, Code: menuitems[i].Code, PriceCents: menuitems[i].PriceCents})
 	}
 
-	log.Printf("len menu: %d", len(data.Menu))
-
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
 }
@@ -115,7 +113,6 @@ func getAllMenuItems(url string, client *http.Client) ([]menuItem, error) {
 	}
 	products := resp["Variants"].(map[string]interface{})
 	all_products := make([]menuItem, 0, len(products))
-	log.Printf("len products: %d", len(products))
 	for name, d := range products {
 		dict := d.(map[string]interface{})
 		price := dict["Price"].(string)
