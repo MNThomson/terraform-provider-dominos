@@ -21,15 +21,19 @@ type dataSourceTrackingType struct{}
 
 func (t dataSourceTrackingType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: "Example data source",
+		Description: `
+Track a Dominos order.
+		`,
 		Attributes: map[string]tfsdk.Attribute{
 			"store_id": {
-				Type:     types.Int64Type,
-				Required: true,
+				Description: "The ID of the store that the order is for.",
+				Type:        types.Int64Type,
+				Required:    true,
 			},
 			"order_id": {
-				Type:     types.Int64Type,
-				Required: true,
+				Description: "The order ID to track.",
+				Type:        types.Int64Type,
+				Required:    true,
 			},
 		},
 	}, nil

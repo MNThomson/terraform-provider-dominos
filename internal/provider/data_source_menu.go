@@ -24,29 +24,42 @@ type dataSourceMenuType struct{}
 
 func (t dataSourceMenuType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: "Example data source",
+		Description: `
+If you would prefer to do your own filtering, you can get access to every item on the dominos menu in your area using this data source.
+This data source takes in store_id and provides menu, a list of all (186, at my dominos) name/code/price_cents blocks.
+
+For the love of all that's holy, do not accidentally feed this data source directly into the dominos_order.
+This will be expensive and probably pretty annoying to the Dominos store, which will be serving you 1 of each 2-liter bottle of soda, 1 of each 20oz bottle, at least 4 different kinds of salad, probably like 6 different kinds of chicken wings, and I think 12 of each kind of pizza?
+(Small, medium, large) x (Hand Tossed, Pan, Stuffed Crust, Gluten Free)?
+Oh plus breads. There's breads on the menu, I found that out while trawling through API responses.
+I wonder who eats those. Are they good? Let me know!
+		`,
 		Attributes: map[string]tfsdk.Attribute{
 			"store_id": {
-				Type:     types.Int64Type,
-				Required: true,
+				Description: "The ID of the store to get the menu for.",
+				Type:        types.Int64Type,
+				Required:    true,
 			},
 			"menu": {
-				Computed: true,
+				Description: "An array of all menu item for the given store.",
+				Computed:    true,
 				Attributes: tfsdk.ListNestedAttributes(map[string]tfsdk.Attribute{
 					"name": {
-						Type:     types.StringType,
-						Computed: true,
+						Description: "The name of the item.",
+						Type:        types.StringType,
+						Computed:    true,
 					},
 					"code": {
-						Type:     types.StringType,
-						Computed: true,
+						Description: "The dominos code for the item.",
+						Type:        types.StringType,
+						Computed:    true,
 					},
 					"price_cents": {
-						Type:     types.Int64Type,
-						Computed: true,
+						Description: "The price in cents of the item.",
+						Type:        types.Int64Type,
+						Computed:    true,
 					},
 				}),
-				Description: "Menu Items",
 			},
 		},
 	}, nil

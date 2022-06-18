@@ -3,12 +3,17 @@
 page_title: "dominos_order Resource - terraform-provider-dominos"
 subcategory: ""
 description: |-
-  Example resource
+  This is it! This will order you your pizzas!
+  As far as I know there is no way to cancel a dominos order programmatically, so if you made a mistake, you'll have to call the store.
+  You should receive an email confirmation almost instantly, and that email will have the store's phone number in it.
 ---
 
 # dominos_order (Resource)
 
-Example resource
+This is it! This will order you your pizzas!
+
+As far as I know there is no way to cancel a dominos order programmatically, so if you made a mistake, you'll have to call the store.
+You should receive an email confirmation almost instantly, and that email will have the store's phone number in it.
 
 
 
@@ -17,16 +22,16 @@ Example resource
 
 ### Required
 
-- `address_api_object` (String)
-- `item_codes` (List of String)
-- `store_id` (Number)
+- `api_object` (String) The computed json payload for the specified address.
+- `item_codes` (List of String) An array of menu items to order.
+- `store_id` (Number) The ID of the store that the order is for.
 
 ### Optional
 
-- `price_only` (Boolean)
+- `price_only` (Boolean) DRY RUN: This will only display the total price of the order (and not actually order).
 
 ### Read-Only
 
-- `total_price` (Number)
+- `total_price` (Number) The computed total price of the order.
 
 

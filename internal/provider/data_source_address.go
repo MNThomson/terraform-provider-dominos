@@ -19,36 +19,46 @@ type dataSourceAddressType struct{}
 
 func (t dataSourceAddressType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Example data source",
+		Description: `
+This data source takes in the delivery address and writes it back out in the two different JSON formats that the API expects.
+
+For carryout, this is purely to find the closest store.
+		`,
 		Attributes: map[string]tfsdk.Attribute{
 			"street": {
-				Type:     types.StringType,
-				Required: true,
+				Description: "The street to deliver the pizza to. Ex: '123 Main St'.",
+				Type:        types.StringType,
+				Required:    true,
 			},
 			"city": {
-				Type:     types.StringType,
-				Required: true,
+				Description: "The city to deliver the pizza to. Ex: 'Anytown'.",
+				Type:        types.StringType,
+				Required:    true,
 			},
 			"region": {
-				Type:     types.StringType,
-				Required: true,
+				Description: "The region to deliver the pizza to, meaning the province or state. Ex: 'BC'.",
+				Type:        types.StringType,
+				Required:    true,
 			},
 			"postal_code": {
-				Type:     types.StringType,
-				Required: true,
+				Description: "The region to deliver the pizza to (or zip for the USA). Ex: 'A1A1A1'.",
+				Type:        types.StringType,
+				Required:    true,
 			},
 			"type": {
-				Type:     types.StringType,
-				Optional: true,
+				Description: "The type of location to deliver to. Default: 'House'.",
+				Type:        types.StringType,
+				Optional:    true,
 			},
 			"url_object": {
-				Type:     types.StringType,
-				Computed: true,
+				Description: "The computed line1 & line2 for the specified address.",
+				Type:        types.StringType,
+				Computed:    true,
 			},
 			"api_object": {
-				Type:     types.StringType,
-				Computed: true,
+				Description: "The computed json payload for the specified address.",
+				Type:        types.StringType,
+				Computed:    true,
 			},
 		},
 	}, nil

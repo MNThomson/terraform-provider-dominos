@@ -23,19 +23,24 @@ type dataSourceStoreType struct{}
 
 func (t dataSourceStoreType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: "Example data source",
+		Description: `
+Provided a Dominos address, this data source returns the store_id of the closest Dominos store, and, in case it's useful to you somehow, the delivery_minutes, an integer showing the estimated minutes until your pizza will be delivered.
+		`,
 		Attributes: map[string]tfsdk.Attribute{
 			"address_url_object": {
-				Type:     types.StringType,
-				Required: true,
+				Description: "The required line1 & line2 for the specified address.",
+				Type:        types.StringType,
+				Required:    true,
 			},
 			"store_id": {
-				Type:     types.Int64Type,
-				Computed: true,
+				Description: "The ID of the store closest to the address.",
+				Type:        types.Int64Type,
+				Computed:    true,
 			},
 			"delivery_minutes": {
-				Type:     types.Int64Type,
-				Computed: true,
+				Description: "The estimated minutes until your pizza will be delivered.",
+				Type:        types.Int64Type,
+				Computed:    true,
 			},
 		},
 	}, nil

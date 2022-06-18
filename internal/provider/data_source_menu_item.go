@@ -20,32 +20,45 @@ type dataSourceMenuItemType struct{}
 
 func (t dataSourceMenuItemType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
-		MarkdownDescription: "Example data source",
+		Description: `
+This data source takes in the store_id and a list of strings (as query_string), and outputs the menu items in matches.
+Each item in matches has three attributes: name, code, and price_cents.
+The name is human-readable, but not useful for ordering.
+The price_cents is also only informational.
+
+Each string in query_string must literally match the name of the menu item for the menu item to appear in matches.
+		`,
 		Attributes: map[string]tfsdk.Attribute{
 			"store_id": {
-				Type:     types.Int64Type,
-				Required: true,
+				Description: "The ID of the store to get the menu for.",
+				Type:        types.Int64Type,
+				Required:    true,
 			},
 			"query_string": {
+				Description: "Each string in query_string must literally match the name of the menu item for the menu item to appear in matches.",
 				Type: types.ListType{
 					ElemType: types.StringType,
 				},
 				Required: true,
 			},
 			"matches": {
-				Computed: true,
+				Description: "An array of all possible menu item that matches the given query string.",
+				Computed:    true,
 				Attributes: tfsdk.ListNestedAttributes(map[string]tfsdk.Attribute{
 					"name": {
-						Type:     types.StringType,
-						Computed: true,
+						Description: "The name of the item.",
+						Type:        types.StringType,
+						Computed:    true,
 					},
 					"code": {
-						Type:     types.StringType,
-						Computed: true,
+						Description: "The dominos code for the item.",
+						Type:        types.StringType,
+						Computed:    true,
 					},
 					"price_cents": {
-						Type:     types.Int64Type,
-						Computed: true,
+						Description: "The price in cents of the item.",
+						Type:        types.Int64Type,
+						Computed:    true,
 					},
 				}),
 			},

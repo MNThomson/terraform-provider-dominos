@@ -19,28 +19,38 @@ type resourceOrderType struct{}
 func (t resourceOrderType) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "Example resource",
+		Description: `
+This is it! This will order you your pizzas!
+
+As far as I know there is no way to cancel a dominos order programmatically, so if you made a mistake, you'll have to call the store.
+You should receive an email confirmation almost instantly, and that email will have the store's phone number in it.
+		`,
 		Attributes: map[string]tfsdk.Attribute{
-			"address_api_object": {
-				Required: true,
-				Type:     types.StringType,
+			"api_object": {
+				Description: "The computed json payload for the specified address.",
+				Required:    true,
+				Type:        types.StringType,
 			},
 			"item_codes": {
-				Required: true,
+				Description: "An array of menu items to order.",
+				Required:    true,
 				Type: types.ListType{
 					ElemType: types.StringType,
 				},
 			},
 			"store_id": {
-				Required: true,
-				Type:     types.Int64Type,
+				Description: "The ID of the store that the order is for.",
+				Required:    true,
+				Type:        types.Int64Type,
 			},
 			"price_only": {
-				Optional: true,
-				Type:     types.BoolType,
+				Description: "DRY RUN: This will only display the total price of the order (and not actually order).",
+				Optional:    true,
+				Type:        types.BoolType,
 			},
 			"total_price": {
-				Computed: true,
+				Description: "The computed total price of the order.",
+				Computed:    true,
 				PlanModifiers: tfsdk.AttributePlanModifiers{
 					tfsdk.UseStateForUnknown(),
 				},

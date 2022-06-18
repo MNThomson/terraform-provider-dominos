@@ -3,12 +3,21 @@
 page_title: "dominos_menu_item Data Source - terraform-provider-dominos"
 subcategory: ""
 description: |-
-  Example data source
+  This data source takes in the storeid and a list of strings (as querystring), and outputs the menu items in matches.
+  Each item in matches has three attributes: name, code, and pricecents.
+  The name is human-readable, but not useful for ordering.
+  The pricecents is also only informational.
+  Each string in query_string must literally match the name of the menu item for the menu item to appear in matches.
 ---
 
 # dominos_menu_item (Data Source)
 
-Example data source
+This data source takes in the store_id and a list of strings (as query_string), and outputs the menu items in matches.
+Each item in matches has three attributes: name, code, and price_cents.
+The name is human-readable, but not useful for ordering.
+The price_cents is also only informational.
+
+Each string in query_string must literally match the name of the menu item for the menu item to appear in matches.
 
 
 
@@ -17,20 +26,20 @@ Example data source
 
 ### Required
 
-- `query_string` (List of String)
-- `store_id` (Number)
+- `query_string` (List of String) Each string in query_string must literally match the name of the menu item for the menu item to appear in matches.
+- `store_id` (Number) The ID of the store to get the menu for.
 
 ### Read-Only
 
-- `matches` (Attributes List) (see [below for nested schema](#nestedatt--matches))
+- `matches` (Attributes List) An array of all possible menu item that matches the given query string. (see [below for nested schema](#nestedatt--matches))
 
 <a id="nestedatt--matches"></a>
 ### Nested Schema for `matches`
 
 Read-Only:
 
-- `code` (String)
-- `name` (String)
-- `price_cents` (Number)
+- `code` (String) The dominos code for the item.
+- `name` (String) The name of the item.
+- `price_cents` (Number) The price in cents of the item.
 
 

@@ -3,12 +3,15 @@
 page_title: "dominos_address Data Source - terraform-provider-dominos"
 subcategory: ""
 description: |-
-  Example data source
+  This data source takes in the delivery address and writes it back out in the two different JSON formats that the API expects.
+  For carryout, this is purely to find the closest store.
 ---
 
 # dominos_address (Data Source)
 
-Example data source
+This data source takes in the delivery address and writes it back out in the two different JSON formats that the API expects.
+
+For carryout, this is purely to find the closest store.
 
 
 
@@ -17,18 +20,18 @@ Example data source
 
 ### Required
 
-- `city` (String)
-- `postal_code` (String)
-- `region` (String)
-- `street` (String)
+- `city` (String) The city to deliver the pizza to. Ex: 'Anytown'.
+- `postal_code` (String) The region to deliver the pizza to (or zip for the USA). Ex: 'A1A1A1'.
+- `region` (String) The region to deliver the pizza to, meaning the province or state. Ex: 'BC'.
+- `street` (String) The street to deliver the pizza to. Ex: '123 Main St'.
 
 ### Optional
 
-- `type` (String)
+- `type` (String) The type of location to deliver to. Default: 'House'.
 
 ### Read-Only
 
-- `api_object` (String)
-- `url_object` (String)
+- `api_object` (String) The computed json payload for the specified address.
+- `url_object` (String) The computed line1 & line2 for the specified address.
 
 
