@@ -3,12 +3,12 @@
 page_title: "dominos_store Data Source - terraform-provider-dominos"
 subcategory: ""
 description: |-
-  Example data source
+  Provided a Dominos address, this data source returns the storeid of the closest Dominos store, and, in case it's useful to you somehow, the deliveryminutes, an integer showing the estimated minutes until your pizza will be delivered.
 ---
 
 # dominos_store (Data Source)
 
-Example data source
+Provided a Dominos address, this data source returns the store_id of the closest Dominos store, and, in case it's useful to you somehow, the delivery_minutes, an integer showing the estimated minutes until your pizza will be delivered.
 
 
 
@@ -17,11 +17,11 @@ Example data source
 
 ### Required
 
-- `address_url_object` (String)
+- `address_url_object` (String) The required line1 & line2 for the specified address.
 
 ### Read-Only
 
-- `delivery_minutes` (Number)
-- `store_id` (Number)
+- `delivery_minutes` (Number) The estimated minutes until your pizza will be delivered.
+- `store_id` (Number) The ID of the store closest to the address.
 
 

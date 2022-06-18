@@ -110,24 +110,24 @@ Massive credit to [nat-henderson](https://github.com/nat-henderson/terraform-pro
 
 ### Required
 
-- `email_address` (String)
-- `first_name` (String)
-- `last_name` (String)
-- `phone_number` (String)
+- `email_address` (String) The email address to receive order updates and a receipt to.
+- `first_name` (String) Your first name.
+- `last_name` (String) Your last name.
+- `phone_number` (String) The phone number Dominos will call if any issues arise.
 
 ### Optional
 
-- `credit_card` (Attributes, Sensitive) (see [below for nested schema](#nestedatt--credit_card))
+- `credit_card` (Attributes, Sensitive) Your actual credit card THAT WILL GET CHARGED. (see [below for nested schema](#nestedatt--credit_card))
 
 <a id="nestedatt--credit_card"></a>
 ### Nested Schema for `credit_card`
 
 Optional:
 
-- `card_type` (String)
-- `cvv` (Number)
-- `date` (String)
-- `number` (Number)
-- `postal_code` (String)
+- `card_type` (String) The credit card type. Default: 'VISA'.
+- `cvv` (Number) The credit card CVV.
+- `date` (String) The credit card expiration date.
+- `number` (Number) The credit card number.
+- `postal_code` (String) The postal code attached to the credit card.
 
 </details>

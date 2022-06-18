@@ -80,46 +80,62 @@ func (p *provider) GetDataSources(ctx context.Context) (map[string]tfsdk.DataSou
 
 func (p *provider) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Diagnostics) {
 	return tfsdk.Schema{
+		Description: `
+The Dominos provider is used to interact with resources supported by Dominos Pizza.
+The provider needs to be configured with a credit card for ordering.
+
+Use the navigation to the right to read about the available resources.
+		`,
 		Attributes: map[string]tfsdk.Attribute{
 			"email_address": {
-				Required: true,
-				Type:     types.StringType,
+				Description: "The email address to receive order updates and a receipt to.",
+				Required:    true,
+				Type:        types.StringType,
 			},
 			"first_name": {
-				Required: true,
-				Type:     types.StringType,
+				Description: "Your first name.",
+				Required:    true,
+				Type:        types.StringType,
 			},
 			"last_name": {
-				Required: true,
-				Type:     types.StringType,
+				Description: "Your last name.",
+				Required:    true,
+				Type:        types.StringType,
 			},
 			"phone_number": {
-				Required: true,
-				Type:     types.StringType,
+				Description: "The phone number Dominos will call if any issues arise.",
+				Required:    true,
+				Type:        types.StringType,
 			},
 			"credit_card": {
-				Optional:  true,
-				Sensitive: true,
+				Description: "Your actual credit card THAT WILL GET CHARGED.",
+				Optional:    true,
+				Sensitive:   true,
 				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
 					"number": {
-						Type:     types.Int64Type,
-						Required: true,
+						Description: "The credit card number.",
+						Type:        types.Int64Type,
+						Required:    true,
 					},
 					"cvv": {
-						Type:     types.Int64Type,
-						Required: true,
+						Description: "The credit card CVV.",
+						Type:        types.Int64Type,
+						Required:    true,
 					},
 					"date": {
-						Type:     types.StringType,
-						Required: true,
+						Description: "The credit card expiration date.",
+						Type:        types.StringType,
+						Required:    true,
 					},
 					"postal_code": {
-						Type:     types.StringType,
-						Required: true,
+						Description: "The postal code attached to the credit card.",
+						Type:        types.StringType,
+						Required:    true,
 					},
 					"card_type": {
-						Type:     types.StringType,
-						Optional: true,
+						Description: "The credit card type. Default: 'VISA'.",
+						Type:        types.StringType,
+						Optional:    true,
 					},
 				}),
 			},
