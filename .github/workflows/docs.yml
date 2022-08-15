@@ -6,6 +6,9 @@ on:
       - master
   pull_request:
 
+env:
+  IsPR: "no"
+
 jobs:
   markdown-link-check:
     name: Markdown Link Check
@@ -19,7 +22,8 @@ jobs:
         run: |
           echo "IsPR='yes'" >> $GITHUB_ENV
         if: github.event_name == 'pull_request'
-      - name: Markdown Check Action
+      - name: Markdown Link Check
         uses: gaurav-nelson/github-action-markdown-link-check@master
         with:
+          config-file: ".github/mlc_config.json"
           check-modified-files-only: ${{ env.IsPR }}
