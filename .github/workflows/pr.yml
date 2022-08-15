@@ -1,20 +1,16 @@
-name: "Misc"
+name: "PR"
 
 on:
-  push:
-    branches:
-      - master
   pull_request:
 
-jobs: 
+jobs:
   labeler:
     name: PR Labeler
-    permissions: 
+    permissions:
       contents: read
       pull-requests: write
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request'
-    steps: 
+    steps:
       - uses: actions/labeler@v4
-        with: 
+        with:
           repo-token: "${{ secrets.GITHUB_TOKEN }}"
