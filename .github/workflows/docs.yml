@@ -7,15 +7,19 @@ on:
   pull_request:
 
 jobs:
-  markdownlint:
-    name: Markdown Lint
+  markdown-link-check:
+    name: Markdown Link Check
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-      - name: markdownlint
-        uses: reviewdog/action-markdownlint@v0
+      - name: Checkout Action
+        uses: actions/checkout@master
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          fail_on_error: true
-          markdownlint_flags: "-i docs ."
+          fetch-depth: 0
+      - name: Check if PR
+        run: |
+          echo "IsPR='yes'" >> $GITHUB_ENV
+        if: github.event_name == 'pull_request'
+      - name: Markdown Check Action
+        uses: gaurav-nelson/github-action-markdown-link-check@master
+        with:
+          check-modified-files-only: ${{ env.IsPR }}
