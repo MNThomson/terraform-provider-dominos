@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -106,20 +107,21 @@ func (d dataSourceMenuItem) Read(ctx context.Context, req tfsdk.ReadDataSourceRe
 	if err != nil {
 		log.Fatalf("Cannot get all menu items: %v", err)
 	}
-	/*
-			queries := data.QueryString.([]interface{})
-		Menu:
-			for i := range menuitems {
-				for j := range queries {
-					if !strings.Contains(strings.ToLower(menuitems[i].Name), strings.ToLower(queries[j].(string))) {
-						continue Menu
-					}
-				}
-				data.Matches = append(data.Matches, menuItem{Name: menuitems[i].Name, Code: menuitems[i].Code, PriceCents: menuitems[i].PriceCents})
+
+	queries := data.QueryString
+
+NextItem:
+	for i := range menuitems {
+		for j := range queries {
+			// Remove quotes from query string
+			query := queries[j].String()[1 : len(queries[j].String())-1]
+
+			if !strings.Contains(strings.ToLower(menuitems[i].Name), strings.ToLower(query)) {
+				continue NextItem
 			}
-	*/
-	data.Matches = append(data.Matches, menuitems[0])
-	data.Matches = append(data.Matches, menuitems[1])
+		}
+		data.Matches = append(data.Matches, menuItem{Name: menuitems[i].Name, Code: menuitems[i].Code, PriceCents: menuitems[i].PriceCents})
+	}
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
