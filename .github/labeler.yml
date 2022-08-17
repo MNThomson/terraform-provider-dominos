@@ -2,7 +2,6 @@
 CI/CD:
   - .github/workflows/*
   - .github/workflows/**/*
-  - .github/*
 
 # Add 'security' label to any change to the security CI workflow
 security:
