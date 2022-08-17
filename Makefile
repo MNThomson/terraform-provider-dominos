@@ -1,21 +1,20 @@
-VERSION =0.1.1
+VERSION =9.9.9
 
 build: *.go
-	go get && go build -o terraform-provider-dominos ./
+	go build -o terraform-provider-dominos .
 
-localInstall:
-	make clean
+run:
+	clear
+	rm -rf .terraform.lock.hcl
 	make build
-	mkdir -p .terraform.d/plugins/registry.terraform.io/mnthomson/dominos/$(VERSION)/linux_amd64/
-	cp terraform-provider-dominos .terraform.d/plugins/registry.terraform.io/mnthomson/dominos/$(VERSION)/linux_amd64/terraform-provider-dominos_v$(VERSION)
 	terraform init -plugin-dir .terraform.d/plugins/
+	TF_LOG=INFO terraform plan
+
+localSetup:
+	mkdir -p .terraform.d/plugins/registry.terraform.io/mnthomson/dominos/$(VERSION)/linux_amd64/
+	ln -s $$(pwd)/terraform-provider-dominos .terraform.d/plugins/registry.terraform.io/mnthomson/dominos/$(VERSION)/linux_amd64/terraform-provider-dominos_v$(VERSION)
 
 clean:
 	rm -rf .terraform .terraform.d .terraform.lock.hcl
 	rm -rf terraform.tfstate*
 	rm -rf terraform-provider-dominos
-
-localTest:
-	clear
-	make localInstall
-	TF_LOG=TRACE terraform plan
