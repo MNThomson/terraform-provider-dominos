@@ -10,6 +10,11 @@ run:
 	terraform init -plugin-dir .terraform.d/plugins/
 	TF_LOG=INFO terraform plan
 
+watch:
+	while true; do \
+		inotifywait -e modify,create,delete -r internal/provider/*.go && make run; \
+	done
+
 localSetup:
 	mkdir -p .terraform.d/plugins/registry.terraform.io/mnthomson/dominos/$(VERSION)/linux_amd64/
 	ln -s $$(pwd)/terraform-provider-dominos .terraform.d/plugins/registry.terraform.io/mnthomson/dominos/$(VERSION)/linux_amd64/terraform-provider-dominos_v$(VERSION)
