@@ -8,14 +8,16 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ tfsdk.DataSourceType = dataSourceTrackingType{}
-var _ tfsdk.DataSource = dataSourceTracking{}
+var _ provider.DataSourceType = dataSourceTrackingType{}
+var _ datasource.DataSource = dataSourceTracking{}
 
 type dataSourceTrackingType struct{}
 
@@ -39,7 +41,7 @@ Track a Dominos order.
 	}, nil
 }
 
-func (t dataSourceTrackingType) NewDataSource(ctx context.Context, in tfsdk.Provider) (tfsdk.DataSource, diag.Diagnostics) {
+func (t dataSourceTrackingType) NewDataSource(ctx context.Context, in provider.Provider) (datasource.DataSource, diag.Diagnostics) {
 	provider, diags := convertProviderType(in)
 
 	return dataSourceTracking{
@@ -53,10 +55,10 @@ type dataSourceTrackingData struct {
 }
 
 type dataSourceTracking struct {
-	provider provider
+	provider dominosProvider
 }
 
-func (d dataSourceTracking) Read(ctx context.Context, req tfsdk.ReadDataSourceRequest, resp *tfsdk.ReadDataSourceResponse) {
+func (d dataSourceTracking) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data dataSourceTrackingData
 
 	diags := req.Config.Get(ctx, &data)

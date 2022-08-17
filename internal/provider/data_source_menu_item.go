@@ -8,14 +8,16 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ tfsdk.DataSourceType = dataSourceMenuItemType{}
-var _ tfsdk.DataSource = dataSourceMenuItem{}
+var _ provider.DataSourceType = dataSourceMenuItemType{}
+var _ datasource.DataSource = dataSourceMenuItem{}
 
 type dataSourceMenuItemType struct{}
 
@@ -67,7 +69,7 @@ Each string in query_string must literally match the name of the menu item for t
 	}, nil
 }
 
-func (t dataSourceMenuItemType) NewDataSource(ctx context.Context, in tfsdk.Provider) (tfsdk.DataSource, diag.Diagnostics) {
+func (t dataSourceMenuItemType) NewDataSource(ctx context.Context, in provider.Provider) (datasource.DataSource, diag.Diagnostics) {
 	provider, diags := convertProviderType(in)
 
 	return dataSourceMenuItem{
@@ -88,10 +90,10 @@ type menuItem struct {
 }
 
 type dataSourceMenuItem struct {
-	provider provider
+	provider dominosProvider
 }
 
-func (d dataSourceMenuItem) Read(ctx context.Context, req tfsdk.ReadDataSourceRequest, resp *tfsdk.ReadDataSourceResponse) {
+func (d dataSourceMenuItem) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data dataSourceMenuItemData
 
 	diags := req.Config.Get(ctx, &data)

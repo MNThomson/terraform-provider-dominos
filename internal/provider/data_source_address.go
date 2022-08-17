@@ -6,14 +6,16 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ tfsdk.DataSourceType = dataSourceAddressType{}
-var _ tfsdk.DataSource = dataSourceAddress{}
+var _ provider.DataSourceType = dataSourceAddressType{}
+var _ datasource.DataSource = dataSourceAddress{}
 
 type dataSourceAddressType struct{}
 
@@ -64,7 +66,7 @@ For carryout, this is purely to find the closest store.
 	}, nil
 }
 
-func (t dataSourceAddressType) NewDataSource(ctx context.Context, in tfsdk.Provider) (tfsdk.DataSource, diag.Diagnostics) {
+func (t dataSourceAddressType) NewDataSource(ctx context.Context, in provider.Provider) (datasource.DataSource, diag.Diagnostics) {
 	provider, diags := convertProviderType(in)
 
 	return dataSourceAddress{
@@ -83,10 +85,10 @@ type dataSourceAddressData struct {
 }
 
 type dataSourceAddress struct {
-	provider provider
+	provider dominosProvider
 }
 
-func (d dataSourceAddress) Read(ctx context.Context, req tfsdk.ReadDataSourceRequest, resp *tfsdk.ReadDataSourceResponse) {
+func (d dataSourceAddress) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data dataSourceAddressData
 
 	diags := req.Config.Get(ctx, &data)

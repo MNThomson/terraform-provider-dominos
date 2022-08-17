@@ -10,14 +10,16 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ tfsdk.DataSourceType = dataSourceStoreType{}
-var _ tfsdk.DataSource = dataSourceStore{}
+var _ provider.DataSourceType = dataSourceStoreType{}
+var _ datasource.DataSource = dataSourceStore{}
 
 type dataSourceStoreType struct{}
 
@@ -46,7 +48,7 @@ Provided a Dominos address, this data source returns the store_id of the closest
 	}, nil
 }
 
-func (t dataSourceStoreType) NewDataSource(ctx context.Context, in tfsdk.Provider) (tfsdk.DataSource, diag.Diagnostics) {
+func (t dataSourceStoreType) NewDataSource(ctx context.Context, in provider.Provider) (datasource.DataSource, diag.Diagnostics) {
 	provider, diags := convertProviderType(in)
 
 	return dataSourceStore{
@@ -61,10 +63,10 @@ type dataSourceStoreData struct {
 }
 
 type dataSourceStore struct {
-	provider provider
+	provider dominosProvider
 }
 
-func (d dataSourceStore) Read(ctx context.Context, req tfsdk.ReadDataSourceRequest, resp *tfsdk.ReadDataSourceResponse) {
+func (d dataSourceStore) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data dataSourceStoreData
 
 	diags := req.Config.Get(ctx, &data)

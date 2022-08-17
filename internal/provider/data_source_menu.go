@@ -11,14 +11,16 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
+	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
-var _ tfsdk.DataSourceType = dataSourceMenuType{}
-var _ tfsdk.DataSource = dataSourceMenu{}
+var _ provider.DataSourceType = dataSourceMenuType{}
+var _ datasource.DataSource = dataSourceMenu{}
 
 type dataSourceMenuType struct{}
 
@@ -65,7 +67,7 @@ I wonder who eats those. Are they good? Let me know!
 	}, nil
 }
 
-func (t dataSourceMenuType) NewDataSource(ctx context.Context, in tfsdk.Provider) (tfsdk.DataSource, diag.Diagnostics) {
+func (t dataSourceMenuType) NewDataSource(ctx context.Context, in provider.Provider) (datasource.DataSource, diag.Diagnostics) {
 	provider, diags := convertProviderType(in)
 
 	return dataSourceMenu{
@@ -79,10 +81,10 @@ type dataSourceMenuData struct {
 }
 
 type dataSourceMenu struct {
-	provider provider
+	provider dominosProvider
 }
 
-func (d dataSourceMenu) Read(ctx context.Context, req tfsdk.ReadDataSourceRequest, resp *tfsdk.ReadDataSourceResponse) {
+func (d dataSourceMenu) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data dataSourceMenuData
 
 	diags := req.Config.Get(ctx, &data)
