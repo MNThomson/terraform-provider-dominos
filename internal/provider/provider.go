@@ -32,6 +32,8 @@ type dominosProvider struct {
 	// provider is built and ran locally, and "test" when running acceptance
 	// testing.
 	version string
+
+	providerdata providerData
 }
 
 type providerData struct {
@@ -61,6 +63,7 @@ func (p *dominosProvider) Configure(ctx context.Context, req provider.ConfigureR
 
 	data.CreditCard.CardType = types.String{Value: string("VISA")}
 
+	p.providerdata = data
 	p.configured = true
 }
 
