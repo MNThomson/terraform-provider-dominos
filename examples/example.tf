@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     dominos = {
-      source  = "MNThomson/dominos"
+      source = "MNThomson/dominos"
     }
   }
 }
@@ -41,7 +41,7 @@ output "OrderOutput" {
 }
 
 resource "dominos_order" "order" {
-  address_api_object = data.dominos_address.addr.api_object
-  item_codes         = data.dominos_menu_item.item.matches[*].code
-  store_id           = data.dominos_store.store.store_id
+  api_object = data.dominos_address.addr.api_object
+  item_codes = data.dominos_menu_item.item.matches[*].code
+  store_id   = data.dominos_store.store.store_id
 }
