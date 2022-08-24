@@ -37,19 +37,10 @@ type dominosProvider struct {
 }
 
 type providerData struct {
-	FirstName   types.String    `tfsdk:"first_name"`
-	LastName    types.String    `tfsdk:"last_name"`
-	EmailAddr   types.String    `tfsdk:"email_address"`
-	PhoneNumber types.String    `tfsdk:"phone_number"`
-	CreditCard  *creditCardData `tfsdk:"credit_card"`
-}
-
-type creditCardData struct {
-	CreditCardNumber types.Int64  `tfsdk:"number"`
-	Cvv              types.Int64  `tfsdk:"cvv"`
-	ExprDate         types.String `tfsdk:"date"`
-	PostalCode       types.String `tfsdk:"postal_code"`
-	CardType         types.String `tfsdk:"card_type"`
+	FirstName   types.String `tfsdk:"first_name"`
+	LastName    types.String `tfsdk:"last_name"`
+	EmailAddr   types.String `tfsdk:"email_address"`
+	PhoneNumber types.String `tfsdk:"phone_number"`
 }
 
 func (p *dominosProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
@@ -60,8 +51,6 @@ func (p *dominosProvider) Configure(ctx context.Context, req provider.ConfigureR
 	if resp.Diagnostics.HasError() {
 		return
 	}
-
-	data.CreditCard.CardType = types.String{Value: string("VISA")}
 
 	p.providerdata = data
 	p.configured = true
@@ -86,7 +75,6 @@ func (p *dominosProvider) GetSchema(ctx context.Context) (tfsdk.Schema, diag.Dia
 	return tfsdk.Schema{
 		Description: `
 The Dominos provider is used to interact with resources supported by Dominos Pizza.
-The provider needs to be configured with a credit card for ordering.
 
 Use the navigation to the right to read about the available resources.
 		`,
@@ -110,38 +98,6 @@ Use the navigation to the right to read about the available resources.
 				Description: "The phone number Dominos will call if any issues arise.",
 				Required:    true,
 				Type:        types.StringType,
-			},
-			"credit_card": {
-				Description: "Your actual credit card THAT WILL GET CHARGED.",
-				Optional:    true,
-				Sensitive:   true,
-				Attributes: tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
-					"number": {
-						Description: "The credit card number.",
-						Type:        types.Int64Type,
-						Required:    true,
-					},
-					"cvv": {
-						Description: "The credit card CVV.",
-						Type:        types.Int64Type,
-						Required:    true,
-					},
-					"date": {
-						Description: "The credit card expiration date.",
-						Type:        types.StringType,
-						Required:    true,
-					},
-					"postal_code": {
-						Description: "The postal code attached to the credit card.",
-						Type:        types.StringType,
-						Required:    true,
-					},
-					"card_type": {
-						Description: "The credit card type. Default: 'VISA'.",
-						Type:        types.StringType,
-						Optional:    true,
-					},
-				}),
 			},
 		},
 	}, nil
