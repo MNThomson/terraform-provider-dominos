@@ -3,7 +3,6 @@ package provider
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -107,7 +106,8 @@ func (d dataSourceMenuItem) Read(ctx context.Context, req datasource.ReadRequest
 	var client = &http.Client{Timeout: 10 * time.Second}
 	menuitems, err := getAllMenuItems(fmt.Sprintf("https://order.dominos.com/power/store/%d/menu?lang=en&structured=true", data.StoreID.Value), client)
 	if err != nil {
-		log.Fatalf("Cannot get all menu items: %v", err)
+		resp.Diagnostics.AddError("Cannot get all menu items", fmt.Sprintf("%s", err))
+		return
 	}
 
 	queries := data.QueryString

@@ -4,7 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
+	"net/http/httputil"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -12,6 +16,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 
 	"github.com/mnthomson/terraform-provider-dominos/internal/utils"
 )
@@ -112,11 +117,6 @@ type Product struct {
 	Options              PizzaOptions `json:"Options"`
 }
 
-/*
- * Light: "0.5"
- * Normal: "1"
- * Extra: "1.5"
- */
 type PizzaOptions struct {
 	Cheese Option `json:"C,omitempty"`
 
@@ -157,6 +157,11 @@ type PizzaOptions struct {
 	Tomatoes          Option `json:"T,omitempty"`
 }
 
+/*
+ * Light: "0.5"
+ * Normal: "1"
+ * Extra: "1.5"
+ */
 type Option struct {
 	Left  string `json:"1/2"`
 	All   string `json:"1/1"`
@@ -197,6 +202,7 @@ type DominosOrderData struct {
 func (r resourceOrder) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data resourceOrderData
 	var providerdata providerData
+	var client = &http.Client{Timeout: 10 * time.Second}
 
 	diags := req.Config.Get(ctx, &data)
 
@@ -239,6 +245,55 @@ func (r resourceOrder) Create(ctx context.Context, req resource.CreateRequest, r
 	order_data.Order.StoreID = strconv.FormatInt(data.StoreID.Value, 10)
 
 	/* Validate Order */
+	output_bytes, err := json.Marshal(order_data)
+	if err != nil {
+		resp.Diagnostics.AddError("Error Marshalling Order Data", fmt.Sprintf("%s", err))
+		return
+	}
+
+	val_req, err := http.NewRequest("POST", "https://order.dominos.ca/power/validate-order", strings.NewReader(string(output_bytes)))
+	if err != nil {
+		resp.Diagnostics.AddError("HTTP Error", fmt.Sprintf("%s", err))
+		return
+	}
+
+	val_req.Header.Set("Referer", "https://order.dominos.com/en/pages/order/")
+	val_req.Header.Set("Content-Type", "application/json")
+
+	dumpreq, err := httputil.DumpRequest(val_req, true)
+	if err != nil {
+		resp.Diagnostics.AddError("HTTP Error", fmt.Sprintf("%s", err))
+		return
+	}
+
+	tflog.Info(ctx, "http request: "+string(dumpreq))
+
+	val_rsp, err := client.Do(val_req)
+	if err != nil {
+		resp.Diagnostics.AddError("HTTP Error", fmt.Sprintf("%s", err))
+		return
+	}
+
+	dumprsp, err := httputil.DumpResponse(val_rsp, true)
+	if err != nil {
+		resp.Diagnostics.AddError("HTTP Error", fmt.Sprintf("%s", err))
+		return
+	}
+
+	tflog.Info(ctx, "http response: %#v"+string(dumprsp))
+	validate_response_obj := make(map[string]interface{})
+	err = json.NewDecoder(val_rsp.Body).Decode(&validate_response_obj)
+
+	if validate_response_obj["Status"].(float64) == -1 {
+		resp.Diagnostics.AddError("The Dominos API didn't like this request", fmt.Sprintf("%s", validate_response_obj["StatusItems"]))
+		return
+	}
+
+	// for k, v := range validate_response_obj["Order"].(map[string]interface{}) {
+	// 	if list, ok := v.([]interface{}); !ok || len(list) > 0 {
+	// 		order_data[k] = v
+	// 	}
+	// }
 
 	/* Price Order */
 
@@ -246,7 +301,9 @@ func (r resourceOrder) Create(ctx context.Context, req resource.CreateRequest, r
 	// Add Payment details
 
 	// Payment defaults
-	err = utils.Set(&(order_data.Order.Address), "default")
+	var payment Payment
+	order_data.Order.Payments = append(order_data.Order.Payments, payment)
+	err = utils.Set(&(order_data.Order.Payments[0]), "default")
 	if err != nil {
 		resp.Diagnostics.AddError("Error Setting Defaults", fmt.Sprintf("%s", err))
 		return
@@ -255,7 +312,12 @@ func (r resourceOrder) Create(ctx context.Context, req resource.CreateRequest, r
 	// Set price
 
 	//Printing output
-	output_bytes, _ := json.Marshal(order_data)
+	// output_bytes, err := json.Marshal(order_data)
+	// if err != nil {
+	// 	resp.Diagnostics.AddError("Error Marshalling Order Data", fmt.Sprintf("%s", err))
+	// 	return
+	// }
+
 	output := string(output_bytes)
 	fmt.Println(output)
 
