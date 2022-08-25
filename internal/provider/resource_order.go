@@ -103,7 +103,65 @@ type Payment struct {
 	// GpmPaymentType string `json:"gpmPaymentType"`
 }
 
-type Product interface{}
+type Product struct {
+	Code                 string       `json:"Code"`
+	Qty                  int          `json:"Qty" default:"1"`
+	ID                   int          `json:"ID"`
+	IsNew                bool         `json:"isNew" default:"true"`
+	ShowBestPriceMessage bool         `json:"ShowBestPriceMessage" default:"false"`
+	Options              PizzaOptions `json:"Options"`
+}
+
+/*
+ * Light: "0.5"
+ * Normal: "1"
+ * Extra: "1.5"
+ */
+type PizzaOptions struct {
+	Cheese Option `json:"C,omitempty"`
+
+	// Pizza Sauces
+	PizzaSauce          Option `json:"X" default:"1"`
+	BBQSauce            Option `json:"Q,omitempty"`
+	AlfredoSauce        Option `json:"Xf,omitempty"`
+	HeartyMarinaraSauce Option `json:"Xm,omitempty"`
+	RanchDressing       Option `json:"Rd,omitempty"`
+	GarlicParmesanSauce Option `json:"Xw,omitempty"`
+
+	// Meats
+	Bacon             Option `json:"K,omitempty"`
+	BeefCrumble       Option `json:"B,omitempty"`
+	BrooklynPepperoni Option `json:"Xp,omitempty"`
+	Chicken           Option `json:"D,omitempty"`
+	Ham               Option `json:"H,omitempty"`
+	Pepperoni         Option `json:"P,omitempty"`
+	PhillySteak       Option `json:"St,omitempty"`
+	Salami            Option `json:"L,omitempty"`
+	Sausage           Option `json:"S,omitempty"`
+
+	// Non-meats
+	BabySpinach       Option `json:"Sp,omitempty"`
+	BlackOlives       Option `json:"R,omitempty"`
+	Cheddar           Option `json:"E,omitempty"`
+	Feta              Option `json:"Fe,omitempty"`
+	GreenOlives       Option `json:"V,omitempty"`
+	GreenPepper       Option `json:"G,omitempty"`
+	HotBananaPeppers  Option `json:"Z,omitempty"`
+	JalapenoPeppers   Option `json:"J,omitempty"`
+	Mushroom          Option `json:"M,omitempty"`
+	Onion             Option `json:"O,omitempty"`
+	ParmesanAsiago    Option `json:"Pa,omitempty"`
+	Pineapple         Option `json:"N,omitempty"`
+	Provolone         Option `json:"Cp,omitempty"`
+	RoastedRedPeppers Option `json:"Rp,omitempty"`
+	Tomatoes          Option `json:"T,omitempty"`
+}
+
+type Option struct {
+	Left  string `json:"1/2"`
+	All   string `json:"1/1"`
+	Right string `json:"2/2"`
+}
 
 type DominosOrderData struct {
 	Order struct {
