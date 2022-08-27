@@ -58,9 +58,7 @@ You should receive an email confirmation almost instantly, and that email will h
 			"total_price": {
 				Description: "The computed total price of the order.",
 				Computed:    true,
-				PlanModifiers: tfsdk.AttributePlanModifiers{
-					resource.UseStateForUnknown()},
-				Type: types.NumberType,
+				Type:        types.NumberType,
 			},
 		},
 	}, nil
@@ -117,46 +115,6 @@ type Product struct {
 	Options              PizzaOptions `json:"Options"`
 }
 
-type PizzaOptions struct {
-	Cheese Option `json:"C,omitempty"`
-
-	// Pizza Sauces
-	PizzaSauce          Option `json:"X" default:"1"`
-	BBQSauce            Option `json:"Q,omitempty"`
-	AlfredoSauce        Option `json:"Xf,omitempty"`
-	HeartyMarinaraSauce Option `json:"Xm,omitempty"`
-	RanchDressing       Option `json:"Rd,omitempty"`
-	GarlicParmesanSauce Option `json:"Xw,omitempty"`
-
-	// Meats
-	Bacon             Option `json:"K,omitempty"`
-	BeefCrumble       Option `json:"B,omitempty"`
-	BrooklynPepperoni Option `json:"Xp,omitempty"`
-	Chicken           Option `json:"D,omitempty"`
-	Ham               Option `json:"H,omitempty"`
-	Pepperoni         Option `json:"P,omitempty"`
-	PhillySteak       Option `json:"St,omitempty"`
-	Salami            Option `json:"L,omitempty"`
-	Sausage           Option `json:"S,omitempty"`
-
-	// Non-meats
-	BabySpinach       Option `json:"Sp,omitempty"`
-	BlackOlives       Option `json:"R,omitempty"`
-	Cheddar           Option `json:"E,omitempty"`
-	Feta              Option `json:"Fe,omitempty"`
-	GreenOlives       Option `json:"V,omitempty"`
-	GreenPepper       Option `json:"G,omitempty"`
-	HotBananaPeppers  Option `json:"Z,omitempty"`
-	JalapenoPeppers   Option `json:"J,omitempty"`
-	Mushroom          Option `json:"M,omitempty"`
-	Onion             Option `json:"O,omitempty"`
-	ParmesanAsiago    Option `json:"Pa,omitempty"`
-	Pineapple         Option `json:"N,omitempty"`
-	Provolone         Option `json:"Cp,omitempty"`
-	RoastedRedPeppers Option `json:"Rp,omitempty"`
-	Tomatoes          Option `json:"T,omitempty"`
-}
-
 /*
  * Light: "0.5"
  * Normal: "1"
@@ -199,6 +157,47 @@ type DominosOrderData struct {
 	} `json:"Order"`
 }
 
+func price_order(ctx context.Context, order_data DominosOrderData, client *http.Client) (string, error) {
+	output_bytes, err := json.Marshal(order_data)
+	if err != nil {
+		return "", fmt.Errorf("Error Marshalling Order Data: %s", err)
+	}
+
+	val_req, err := http.NewRequest("POST", "https://order.dominos.ca/power/price-order", strings.NewReader(string(output_bytes)))
+	if err != nil {
+		return "", fmt.Errorf("HTTP Error: %s", err)
+	}
+
+	val_req.Header.Set("Referer", "https://order.dominos.ca/en/pages/order/")
+	val_req.Header.Set("Content-Type", "application/json")
+
+	dumpreq, err := httputil.DumpRequest(val_req, true)
+	if err != nil {
+		return "", fmt.Errorf("HTTP Error: %s", err)
+	}
+
+	tflog.Info(ctx, "http request:\n"+string(dumpreq)+"\n")
+
+	val_rsp, err := client.Do(val_req)
+	if err != nil {
+		return "", fmt.Errorf("HTTP Error: %s", err)
+	}
+
+	dumprsp, err := httputil.DumpResponse(val_rsp, true)
+	if err != nil {
+		return "", fmt.Errorf("HTTP Error: %s", err)
+	}
+
+	tflog.Info(ctx, "http response:\n"+string(dumprsp)+"\n")
+	validate_response_obj := make(map[string]interface{})
+	err = json.NewDecoder(val_rsp.Body).Decode(&validate_response_obj)
+
+	if validate_response_obj["Status"].(float64) == -1 {
+		return "", fmt.Errorf("The Dominos API didn't like this request: %s", validate_response_obj["StatusItems"])
+	}
+	return "Hello", nil
+}
+
 func (r resourceOrder) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var data resourceOrderData
 	var providerdata providerData
@@ -217,14 +216,14 @@ func (r resourceOrder) Create(ctx context.Context, req resource.CreateRequest, r
 	// Order data defaults
 	err := utils.Set(&(order_data.Order), "default")
 	if err != nil {
-		resp.Diagnostics.AddError("Error Setting Defaults", fmt.Sprintf("%s", err))
+		resp.Diagnostics.AddError("Error Setting Order Defaults", fmt.Sprintf("%s", err))
 		return
 	}
 
 	// Address defaults
 	err = utils.Set(&(order_data.Order.Address), "default")
 	if err != nil {
-		resp.Diagnostics.AddError("Error Setting Defaults", fmt.Sprintf("%s", err))
+		resp.Diagnostics.AddError("Error Setting Address Defaults", fmt.Sprintf("%s", err))
 		return
 	}
 
@@ -244,60 +243,23 @@ func (r resourceOrder) Create(ctx context.Context, req resource.CreateRequest, r
 	// Misc
 	order_data.Order.StoreID = strconv.FormatInt(data.StoreID.Value, 10)
 
-	/* Validate Order */
-	output_bytes, err := json.Marshal(order_data)
+	/*
+	 * Add items to Products
+	 */
+
+	/*
+	 * Price Order
+	 */
+	price_res, err := price_order(ctx, *order_data, client)
 	if err != nil {
-		resp.Diagnostics.AddError("Error Marshalling Order Data", fmt.Sprintf("%s", err))
+		resp.Diagnostics.AddError("Error Pricing Order", fmt.Sprintf("%s", err))
 		return
 	}
+	fmt.Println(price_res)
 
-	val_req, err := http.NewRequest("POST", "https://order.dominos.ca/power/validate-order", strings.NewReader(string(output_bytes)))
-	if err != nil {
-		resp.Diagnostics.AddError("HTTP Error", fmt.Sprintf("%s", err))
-		return
-	}
-
-	val_req.Header.Set("Referer", "https://order.dominos.com/en/pages/order/")
-	val_req.Header.Set("Content-Type", "application/json")
-
-	dumpreq, err := httputil.DumpRequest(val_req, true)
-	if err != nil {
-		resp.Diagnostics.AddError("HTTP Error", fmt.Sprintf("%s", err))
-		return
-	}
-
-	tflog.Info(ctx, "http request: "+string(dumpreq))
-
-	val_rsp, err := client.Do(val_req)
-	if err != nil {
-		resp.Diagnostics.AddError("HTTP Error", fmt.Sprintf("%s", err))
-		return
-	}
-
-	dumprsp, err := httputil.DumpResponse(val_rsp, true)
-	if err != nil {
-		resp.Diagnostics.AddError("HTTP Error", fmt.Sprintf("%s", err))
-		return
-	}
-
-	tflog.Info(ctx, "http response: %#v"+string(dumprsp))
-	validate_response_obj := make(map[string]interface{})
-	err = json.NewDecoder(val_rsp.Body).Decode(&validate_response_obj)
-
-	if validate_response_obj["Status"].(float64) == -1 {
-		resp.Diagnostics.AddError("The Dominos API didn't like this request", fmt.Sprintf("%s", validate_response_obj["StatusItems"]))
-		return
-	}
-
-	// for k, v := range validate_response_obj["Order"].(map[string]interface{}) {
-	// 	if list, ok := v.([]interface{}); !ok || len(list) > 0 {
-	// 		order_data[k] = v
-	// 	}
-	// }
-
-	/* Price Order */
-
-	/* Order order */
+	/*
+	 * Order order
+	 */
 	// Add Payment details
 
 	// Payment defaults
@@ -305,21 +267,28 @@ func (r resourceOrder) Create(ctx context.Context, req resource.CreateRequest, r
 	order_data.Order.Payments = append(order_data.Order.Payments, payment)
 	err = utils.Set(&(order_data.Order.Payments[0]), "default")
 	if err != nil {
-		resp.Diagnostics.AddError("Error Setting Defaults", fmt.Sprintf("%s", err))
+		resp.Diagnostics.AddError("Error Setting Payment Defaults", fmt.Sprintf("%s", err))
 		return
 	}
 
 	// Set price
 
+	//Place Order
+	// place_res, err := place_order(*order_data, client)
+	// if err != nil {
+	// 	return
+	// }
+	// fmt.Println(place_res)
+
 	//Printing output
 	// output_bytes, err := json.Marshal(order_data)
 	// if err != nil {
-	// 	resp.Diagnostics.AddError("Error Marshalling Order Data", fmt.Sprintf("%s", err))
+	// 	resp.Diagnostics.AddError("Error Placing Order", fmt.Sprintf("%s", err))
 	// 	return
 	// }
 
-	output := string(output_bytes)
-	fmt.Println(output)
+	// output := string(output_bytes)
+	// fmt.Println(output)
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)

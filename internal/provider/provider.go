@@ -68,6 +68,7 @@ func (p *dominosProvider) GetDataSources(ctx context.Context) (map[string]provid
 		"dominos_store":     dataSourceStoreType{},
 		"dominos_menu":      dataSourceMenuType{},
 		"dominos_menu_item": dataSourceMenuItemType{},
+		"dominos_pizza":     dataSourcePizzaType{},
 	}, nil
 }
 
