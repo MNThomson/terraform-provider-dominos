@@ -121,9 +121,9 @@ type Product struct {
  * Extra: "1.5"
  */
 type Option struct {
-	Left  string `json:"1/2"`
-	All   string `json:"1/1"`
-	Right string `json:"2/2"`
+	Left  string `json:"1/2,omitempty"`
+	All   string `json:"1/1,omitempty"`
+	Right string `json:"2/2,omitempty"`
 }
 
 type DominosOrderData struct {
@@ -191,6 +191,9 @@ func price_order(ctx context.Context, order_data DominosOrderData, client *http.
 	tflog.Info(ctx, "http response:\n"+string(dumprsp)+"\n")
 	validate_response_obj := make(map[string]interface{})
 	err = json.NewDecoder(val_rsp.Body).Decode(&validate_response_obj)
+	if err != nil {
+		return "", fmt.Errorf("JSON Decoder error: %s", err)
+	}
 
 	if validate_response_obj["Status"].(float64) == -1 {
 		return "", fmt.Errorf("The Dominos API didn't like this request: %s", validate_response_obj["StatusItems"])

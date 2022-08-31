@@ -2,12 +2,14 @@ package provider
 
 import (
 	"context"
+	"encoding/json"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -18,12 +20,12 @@ type dataSourcePizzaType struct{}
 
 var itemOptionsAttributes = tfsdk.SingleNestedAttributes(map[string]tfsdk.Attribute{
 	"portion": {
-		Description: "",
+		Description: "Choose:",
 		Optional:    true,
 		Type:        types.StringType,
 	},
 	"weight": {
-		Description: "",
+		Description: "Choose:",
 		Optional:    true,
 		Type:        types.StringType,
 	},
@@ -48,12 +50,17 @@ Provided a Dominos address, this data source returns the store_id of the closest
 			"options": {
 				Description: "",
 				Optional:    true,
-				Attributes:  optionsAttributes,
+				Attributes:  tfsdk.SingleNestedAttributes(pizzaOptionsAttributes()),
 			},
 			"pizza_json": {
 				Description: "The json for the pizza Product.",
 				Type:        types.StringType,
 				Computed:    true,
+			},
+			"quantity": {
+				Description: "",
+				Type:        types.NumberType,
+				Optional:    true,
 			},
 		},
 	}, nil
@@ -72,6 +79,7 @@ type dataSourcePizzaData struct {
 	Crust     types.String `tfsdk:"crust"`
 	Options   types.Object `tfsdk:"options"`
 	PizzaJson types.String `tfsdk:"pizza_json"`
+	Quantity  types.Number `tfsdk:"quantity"`
 }
 
 type dataSourcePizza struct {
@@ -80,6 +88,7 @@ type dataSourcePizza struct {
 
 func (d dataSourcePizza) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data dataSourcePizzaData
+	var PizzaJson Product
 
 	diags := req.Config.Get(ctx, &data)
 
@@ -93,7 +102,22 @@ func (d dataSourcePizza) Read(ctx context.Context, req datasource.ReadRequest, r
 	// 	fmt.Printf("Key: %s, Value: %s\n", key, val)
 	// }
 
-	data.PizzaJson = types.String{Value: data.Options.String()}
+	// Pizza Code
+	// TODO: Validate crust is offered
+	PizzaJson.Code = data.Size.Value + data.Crust.Value
+	if data.Quantity.Null {
+		PizzaJson.Qty = 1
+	} else {
+		qty, _ := data.Quantity.Value.Int64()
+		PizzaJson.Qty = int(qty)
+	}
+
+	out, _ := json.Marshal(PizzaJson)
+	output := string(out)
+
+	tflog.Info(ctx, string(out))
+
+	data.PizzaJson = types.String{Value: output}
 
 	diags = resp.State.Set(ctx, &data)
 	resp.Diagnostics.Append(diags...)
