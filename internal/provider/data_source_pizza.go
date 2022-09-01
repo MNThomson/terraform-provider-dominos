@@ -11,6 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/tfsdk"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/mitchellh/mapstructure"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces
@@ -99,10 +100,6 @@ func (d dataSourcePizza) Read(ctx context.Context, req datasource.ReadRequest, r
 		return
 	}
 
-	// for key, val := range data.Options.Attrs {
-	// 	fmt.Printf("Key: %s, Value: %s\n", key, val)
-	// }
-
 	// Pizza Code
 	// TODO: Validate crust is offered
 	pizzaJson.Code = data.Size.Value + data.Crust.Value
@@ -115,11 +112,10 @@ func (d dataSourcePizza) Read(ctx context.Context, req datasource.ReadRequest, r
 
 	if !data.Options.IsNull() {
 		var tmp1 TFPizzaOption
-		mapTest := make(map[string]string)
+		mapTest := make(map[string]Option)
 
-		// data.Options.AttrTypes["salami"] = types.String{Value: "TELKSLKFSDKLJFSDLK"}
+		pizzaOptionMap := make(map[string]string)
 
-		// salami, potion/weight
 		for optionName, optionVal := range data.Options.Attrs {
 			if optionVal.IsNull() {
 				continue
@@ -132,20 +128,10 @@ func (d dataSourcePizza) Read(ctx context.Context, req datasource.ReadRequest, r
 			}
 
 			var key string
-			if tmp1.Portion != nil {
-				switch *tmp1.Portion {
-				case "all":
-					key = "1/1"
-				case "left":
-					key = "1/2"
-				case "right":
-					key = "2/2"
-				default:
-					resp.Diagnostics.AddError("Portion not valid:", fmt.Sprintf("%s", *tmp1.Portion))
-					return
-				}
+			if tmp1.Portion == nil {
+				key = "all"
 			} else {
-				key = "1/1"
+				key = *tmp1.Portion
 			}
 
 			var weight string
@@ -165,10 +151,15 @@ func (d dataSourcePizza) Read(ctx context.Context, req datasource.ReadRequest, r
 				weight = "1"
 			}
 
-			mapTest[optionName] = fmt.Sprintf("{\"%s\":\"%s\"}", key, weight)
-			// tflog.Info(ctx, key+val.String())
+			pizzaOptionMap[key] = weight
+			var pizzaOption Option
+			mapstructure.Decode(pizzaOptionMap, &pizzaOption)
+
+			mapTest[optionName] = pizzaOption
 		}
 		tflog.Info(ctx, fmt.Sprint(mapTest))
+
+		mapstructure.Decode(mapTest, &pizzaJson.Options)
 	}
 
 	out, _ := json.Marshal(pizzaJson)

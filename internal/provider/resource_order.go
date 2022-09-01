@@ -121,9 +121,9 @@ type Product struct {
  * Extra: "1.5"
  */
 type Option struct {
-	Left  string `json:"1/2,omitempty"`
-	All   string `json:"1/1,omitempty"`
-	Right string `json:"2/2,omitempty"`
+	Left  string `json:"1/2,omitempty" mapstructure:"left"`
+	All   string `json:"1/1,omitempty" mapstructure:"all"`
+	Right string `json:"2/2,omitempty" mapstructure:"right"`
 }
 
 type TFPizzaOption struct {

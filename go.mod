@@ -6,6 +6,7 @@ require (
 	github.com/hashicorp/terraform-plugin-docs v0.10.1
 	github.com/hashicorp/terraform-plugin-framework v0.11.1
 	github.com/hashicorp/terraform-plugin-log v0.7.0
+	github.com/mitchellh/mapstructure v1.5.0
 )
 
 require (
