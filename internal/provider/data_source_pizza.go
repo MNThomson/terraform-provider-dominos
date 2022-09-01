@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -88,7 +89,7 @@ type dataSourcePizza struct {
 
 func (d dataSourcePizza) Read(ctx context.Context, req datasource.ReadRequest, resp *datasource.ReadResponse) {
 	var data dataSourcePizzaData
-	var PizzaJson Product
+	var pizzaJson Product
 
 	diags := req.Config.Get(ctx, &data)
 
@@ -104,15 +105,73 @@ func (d dataSourcePizza) Read(ctx context.Context, req datasource.ReadRequest, r
 
 	// Pizza Code
 	// TODO: Validate crust is offered
-	PizzaJson.Code = data.Size.Value + data.Crust.Value
+	pizzaJson.Code = data.Size.Value + data.Crust.Value
 	if data.Quantity.Null {
-		PizzaJson.Qty = 1
+		pizzaJson.Qty = 1
 	} else {
 		qty, _ := data.Quantity.Value.Int64()
-		PizzaJson.Qty = int(qty)
+		pizzaJson.Qty = int(qty)
 	}
 
-	out, _ := json.Marshal(PizzaJson)
+	if !data.Options.IsNull() {
+		var tmp1 TFPizzaOption
+		mapTest := make(map[string]string)
+
+		// data.Options.AttrTypes["salami"] = types.String{Value: "TELKSLKFSDKLJFSDLK"}
+
+		// salami, potion/weight
+		for optionName, optionVal := range data.Options.Attrs {
+			if optionVal.IsNull() {
+				continue
+			}
+
+			err := json.Unmarshal([]byte(optionVal.String()), &tmp1)
+			if err != nil {
+				resp.Diagnostics.AddError("Cannot unmarshall Stuff", fmt.Sprintf("%s", err))
+				return
+			}
+
+			var key string
+			if tmp1.Portion != nil {
+				switch *tmp1.Portion {
+				case "all":
+					key = "1/1"
+				case "left":
+					key = "1/2"
+				case "right":
+					key = "2/2"
+				default:
+					resp.Diagnostics.AddError("Portion not valid:", fmt.Sprintf("%s", *tmp1.Portion))
+					return
+				}
+			} else {
+				key = "1/1"
+			}
+
+			var weight string
+			if tmp1.Weight != nil {
+				switch *tmp1.Weight {
+				case "light":
+					weight = "0.5"
+				case "normal":
+					weight = "1"
+				case "extra":
+					weight = "1.5"
+				default:
+					resp.Diagnostics.AddError("Weight not valid:", fmt.Sprintf("%s", *tmp1.Weight))
+					return
+				}
+			} else {
+				weight = "1"
+			}
+
+			mapTest[optionName] = fmt.Sprintf("{\"%s\":\"%s\"}", key, weight)
+			// tflog.Info(ctx, key+val.String())
+		}
+		tflog.Info(ctx, fmt.Sprint(mapTest))
+	}
+
+	out, _ := json.Marshal(pizzaJson)
 	output := string(out)
 
 	tflog.Info(ctx, string(out))

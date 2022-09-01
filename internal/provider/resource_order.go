@@ -126,6 +126,11 @@ type Option struct {
 	Right string `json:"2/2,omitempty"`
 }
 
+type TFPizzaOption struct {
+	Portion *string `json:"portion,omitempty"`
+	Weight  *string `json:"weight,omitempty"`
+}
+
 type DominosOrderData struct {
 	Order struct {
 		Address               Address    `json:"Address"`
