@@ -43,8 +43,8 @@ You should receive an email confirmation almost instantly, and that email will h
 				Required:    true,
 				Type:        types.StringType,
 			},
-			"item_codes": {
-				Description: "An array of menu items to order.",
+			"items": {
+				Description: "An array of menu item objects to order.",
 				Required:    true,
 				Type: types.ListType{
 					ElemType: types.StringType,
@@ -74,7 +74,7 @@ func (t resourceOrderType) NewResource(ctx context.Context, in provider.Provider
 
 type resourceOrderData struct {
 	AddressAPIObj types.String `tfsdk:"address_api_object"`
-	ItemCodes     types.List   `tfsdk:"item_codes"`
+	Items         types.List   `tfsdk:"items"`
 	StoreID       types.Int64  `tfsdk:"store_id"`
 	TotalPrice    types.Number `tfsdk:"total_price"`
 }
@@ -149,7 +149,7 @@ type DominosOrderData struct {
 		Phone                 string     `json:"Phone"`
 		PhonePrefix           string     `json:"PhonePrefix" default:""`
 		Products              []Product  `json:"Products"`
-		ServiceMethod         string     `json:"ServiceMethod" default:"Delivery"`
+		ServiceMethod         string     `json:"ServiceMethod" default:"Carryout"` // TODO: Option for Delivery
 		SourceOrganizationURI string     `json:"SourceOrganizationURI" default:"order.dominos.com"`
 		StoreID               string     `json:"StoreID"`
 		Tags                  struct{}   `json:"Tags"`
@@ -254,6 +254,22 @@ func (r resourceOrder) Create(ctx context.Context, req resource.CreateRequest, r
 	/*
 	 * Add items to Products
 	 */
+
+	for _, jsonString := range data.Items.Elems {
+		jsonUnquoted := jsonString.String()[1 : len(jsonString.String())-1]
+
+		jsonCleaned := strings.ReplaceAll(jsonUnquoted, "\\", "")
+
+		tflog.Info(ctx, jsonCleaned)
+
+		var tmpProduct Product
+		err := json.Unmarshal([]byte(jsonCleaned), &tmpProduct)
+		if err != nil {
+			resp.Diagnostics.AddError("Cannot unmarshall Stuff", fmt.Sprintf("%s", err))
+			return
+		}
+		order_data.Order.Products = append(order_data.Order.Products, tmpProduct)
+	}
 
 	/*
 	 * Price Order
