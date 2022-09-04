@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -114,27 +115,39 @@ func (d dataSourcePizza) Read(ctx context.Context, req datasource.ReadRequest, r
 		var tmp1 TFPizzaOption
 		mapTest := make(map[string]Option)
 
-		pizzaOptionMap := make(map[string]string)
-
 		for optionName, optionVal := range data.Options.Attrs {
+			pizzaOptionMap := make(map[string]string)
+			var key string
+			var weight string
+
+			optionValStr := strings.ReplaceAll(optionVal.String(), "<null>", "null")
+
 			if optionVal.IsNull() {
 				continue
 			}
 
-			err := json.Unmarshal([]byte(optionVal.String()), &tmp1)
+			err := json.Unmarshal([]byte(optionValStr), &tmp1)
 			if err != nil {
 				resp.Diagnostics.AddError("Cannot unmarshall Stuff", fmt.Sprintf("%s", err))
 				return
 			}
 
-			var key string
-			if tmp1.Portion == nil {
-				key = "all"
+			if tmp1.Portion != nil {
+				switch *tmp1.Portion {
+				case "left":
+					key = "left"
+				case "all":
+					key = "all"
+				case "right":
+					key = "right"
+				default:
+					resp.Diagnostics.AddError("Portion not valid:", fmt.Sprintf("%s", *tmp1.Weight))
+					return
+				}
 			} else {
-				key = *tmp1.Portion
+				key = "all"
 			}
 
-			var weight string
 			if tmp1.Weight != nil {
 				switch *tmp1.Weight {
 				case "light":
@@ -157,7 +170,6 @@ func (d dataSourcePizza) Read(ctx context.Context, req datasource.ReadRequest, r
 
 			mapTest[optionName] = pizzaOption
 		}
-		tflog.Info(ctx, fmt.Sprint(mapTest))
 
 		mapstructure.Decode(mapTest, &pizzaJson.Options)
 	}

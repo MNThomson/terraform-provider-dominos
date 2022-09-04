@@ -170,7 +170,7 @@ func price_order(ctx context.Context, order_data DominosOrderData, client *http.
 
 	val_req, err := http.NewRequest("POST", "https://order.dominos.ca/power/price-order", strings.NewReader(string(output_bytes)))
 	if err != nil {
-		return "", fmt.Errorf("HTTP Error: %s", err)
+		return "", fmt.Errorf("HTTP NewRequest Error: %s", err)
 	}
 
 	val_req.Header.Set("Referer", "https://order.dominos.ca/en/pages/order/")
@@ -178,19 +178,19 @@ func price_order(ctx context.Context, order_data DominosOrderData, client *http.
 
 	dumpreq, err := httputil.DumpRequest(val_req, true)
 	if err != nil {
-		return "", fmt.Errorf("HTTP Error: %s", err)
+		return "", fmt.Errorf("HTTP Dump Request Error: %s", err)
 	}
 
 	tflog.Info(ctx, "http request:\n"+string(dumpreq)+"\n")
 
 	val_rsp, err := client.Do(val_req)
 	if err != nil {
-		return "", fmt.Errorf("HTTP Error: %s", err)
+		return "", fmt.Errorf("HTTP Request Error: %s", err)
 	}
 
 	dumprsp, err := httputil.DumpResponse(val_rsp, true)
 	if err != nil {
-		return "", fmt.Errorf("HTTP Error: %s", err)
+		return "", fmt.Errorf("HTTP Dump Response Error: %s", err)
 	}
 
 	tflog.Info(ctx, "http response:\n"+string(dumprsp)+"\n")
@@ -259,8 +259,6 @@ func (r resourceOrder) Create(ctx context.Context, req resource.CreateRequest, r
 		jsonUnquoted := jsonString.String()[1 : len(jsonString.String())-1]
 
 		jsonCleaned := strings.ReplaceAll(jsonUnquoted, "\\", "")
-
-		tflog.Info(ctx, jsonCleaned)
 
 		var tmpProduct Product
 		err := json.Unmarshal([]byte(jsonCleaned), &tmpProduct)
