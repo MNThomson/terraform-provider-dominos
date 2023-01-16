@@ -1,6 +1,6 @@
 # Terraform Provider for Dominos Pizza
 
-[![GitHub Release Workflow Status](https://img.shields.io/github/workflow/status/MNThomson/terraform-provider-dominos/release?label=Build&labelColor=black&logo=GitHub%20Actions&style=flat-square)](https://github.com/MNThomson/terraform-provider-dominos/actions/workflows/release.yml)
+[![GitHub Release Workflow Status](https://img.shields.io/github/actions/workflow/status/MNThomson/terraform-provider-dominos/release.yml?label=Build&labelColor=black&logo=GitHub%20Actions&style=flat-square)](https://github.com/MNThomson/terraform-provider-dominos/actions/workflows/release.yml)
 [![Terraform Registry Version](https://img.shields.io/github/v/release/MNThomson/terraform-provider-dominos?labelColor=black&label=TF%20Registry&logo=terraform&logoColor=7b42bc&color=7b42bc&style=flat-square)](https://registry.terraform.io/providers/MNThomson/dominos/latest)
 [![Terraform Registry Downloads](https://img.shields.io/badge/dynamic/json?color=7b42bc&label=Downloads&labelColor=black&logo=terraform&logoColor=7b42bc&query=data.attributes.total&url=https%3A%2F%2Fregistry.terraform.io%2Fv2%2Fproviders%2F3133%2Fdownloads%2Fsummary&style=flat-square)](https://registry.terraform.io/providers/MNThomson/dominos/latest)
 
