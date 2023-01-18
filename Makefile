@@ -5,14 +5,15 @@ build: *.go
 
 run:
 	clear
-	rm -rf .terraform.lock.hcl
+	rm -rf .terraform.lock.hcl terraform.tfstat*
 	make build
 	terraform init -plugin-dir .terraform.d/plugins/
-	TF_LOG=INFO terraform plan
+	TF_LOG=INFO terraform apply -auto-approve
+	rm -rf .terraform.lock.hcl terraform.tfstat*
 
 watch:
 	while true; do \
-		inotifywait -e modify,create,delete -r internal/provider/*.go && make run; \
+	    inotifywait -e modify,create,delete -r internal/provider/*.go && make run; \
 	done
 
 localSetup:

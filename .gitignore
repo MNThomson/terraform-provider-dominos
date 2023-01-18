@@ -13,3 +13,8 @@ terraform-provider-dominos
 
 # VSCode
 .vscode
+
+# Randon
+_*.*
+data
+NOTES.md

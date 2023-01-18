@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/diag"
@@ -113,15 +112,16 @@ func (d dataSourceAddress) Read(ctx context.Context, req datasource.ReadRequest,
 	}
 	url_json, err := json.Marshal(urlobj)
 	if err != nil {
-		log.Fatalf("Cannot unmarshall urlobj")
-
+		resp.Diagnostics.AddError("Cannot unmarshall urlobj", fmt.Sprintf("%s", err))
+		return
 	}
 
 	data.URLObject = types.String{Value: string(url_json)}
 
 	api_json, err := json.Marshal(apiobj)
 	if err != nil {
-		log.Fatalf("Cannot unmarshall apiobj")
+		resp.Diagnostics.AddError("Cannot unmarshall apiobj", fmt.Sprintf("%s", err))
+		return
 	}
 
 	data.APIObject = types.String{Value: string(api_json)}

@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -81,16 +80,19 @@ func (d dataSourceStore) Read(ctx context.Context, req datasource.ReadRequest, r
 	address_url_obj := make(map[string]string)
 	err := json.Unmarshal([]byte(data.AddressURLObj.Value), &address_url_obj)
 	if err != nil {
-		log.Fatalf("Cannot unmarshall address_url_obj")
+		resp.Diagnostics.AddError("Cannot unmarshall address_url_obj", fmt.Sprintf("%s", err))
+		return
 	}
 	line1 := url.QueryEscape(address_url_obj["line1"])
 	line2 := url.QueryEscape(address_url_obj["line2"])
-	stores, err := getStores(fmt.Sprintf("https://order.dominos.com/power/store-locator?s=%s&c=%s&s=Delivery", line1, line2), client)
+	stores, err := getStores(fmt.Sprintf("https://order.dominos.ca/power/store-locator?s=%s&c=%s&s=Delivery", line1, line2), client)
 	if err != nil {
-		log.Fatalf("Cannot get stores: %v", err)
+		resp.Diagnostics.AddError("Cannot get stores", fmt.Sprintf("%s", err))
+		return
 	}
 	if len(stores) == 0 {
-		log.Fatalf("No stores near the address %#v", address_url_obj)
+		resp.Diagnostics.AddError("No stores near the address", fmt.Sprintf("%s", err))
+		return
 	}
 	storeID, _ := strconv.ParseInt(stores[0].StoreID, 10, 64)
 	data.StoreID = types.Int64{Value: storeID}

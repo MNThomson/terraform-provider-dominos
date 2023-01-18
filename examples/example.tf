@@ -11,13 +11,6 @@ provider "dominos" {
   last_name     = "Name"
   email_address = "my@name.com"
   phone_number  = "15555555555"
-
-  credit_card = {
-    number      = 123456789101112
-    cvv         = 1314
-    date        = "15/16"
-    postal_code = "18192"
-  }
 }
 
 data "dominos_address" "addr" {

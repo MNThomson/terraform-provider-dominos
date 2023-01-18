@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"time"
 
@@ -71,9 +70,10 @@ func (d dataSourceTracking) Read(ctx context.Context, req datasource.ReadRequest
 
 	var client = &http.Client{Timeout: 10 * time.Second}
 
-	_, err := getTrackingApiObject(fmt.Sprintf("https://trkweb.dominos.com/orderstorage/GetTrackerData?StoreID=%d&OrderKey=%d", data.StoreID.Value, data.OrderID.Value), client)
+	_, err := getTrackingApiObject(fmt.Sprintf("https://trkweb.dominos.ca/orderstorage/GetTrackerData?StoreID=%d&OrderKey=%d", data.StoreID.Value, data.OrderID.Value), client)
 	if err != nil {
-		log.Fatalf("Cannot get tracking api object: %v", err)
+		resp.Diagnostics.AddError("Cannot get tracking api object", fmt.Sprintf("%s", err))
+		return
 	}
 
 	diags = resp.State.Set(ctx, &data)

@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"sort"
 	"strconv"
@@ -97,9 +96,10 @@ func (d dataSourceMenu) Read(ctx context.Context, req datasource.ReadRequest, re
 
 	var client = &http.Client{Timeout: 10 * time.Second}
 
-	menuitems, err := getAllMenuItems(fmt.Sprintf("https://order.dominos.com/power/store/%d/menu?lang=en&structured=true", data.StoreID.Value), client)
+	menuitems, err := getAllMenuItems(fmt.Sprintf("https://order.dominos.ca/power/store/%d/menu?lang=en&structured=true", data.StoreID.Value), client)
 	if err != nil {
-		log.Fatalf("Cannot get all menu items: %v", err)
+		resp.Diagnostics.AddError("Cannot get all menu items", fmt.Sprintf("%s", err))
+		return
 	}
 
 	for i := range menuitems {
