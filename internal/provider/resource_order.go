@@ -70,7 +70,7 @@ func (t resourceOrderType) NewResource(ctx context.Context, in provider.Provider
 }
 
 type resourceOrderData struct {
-	AddressAPIObj types.String `tfsdk:"address_api_object"`
+	AddressAPIObj types.String `tfsdk:"api_object"`
 	ItemCodes     types.List   `tfsdk:"item_codes"`
 	StoreID       types.Int64  `tfsdk:"store_id"`
 	PriceOnly     types.Bool   `tfsdk:"price_only"`
