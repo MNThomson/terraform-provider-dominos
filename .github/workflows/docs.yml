@@ -14,7 +14,7 @@ jobs:
     name: Markdown Link Check
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Action
+      - name: Checkout code
         uses: actions/checkout@v3
         with:
           fetch-depth: 0

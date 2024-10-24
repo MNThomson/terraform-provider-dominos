@@ -20,7 +20,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v3
         with:
-          go-version-file: 'go.mod'
+          go-version-file: "go.mod"
           cache: true
       - name: Go fmt
         run: go fmt
@@ -38,7 +38,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v3
         with:
-          go-version-file: 'go.mod'
+          go-version-file: "go.mod"
           cache: true
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3
